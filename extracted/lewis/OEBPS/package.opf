@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<package xmlns="http://www.idpf.org/2007/opf" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" version="3.0" xml:lang="en" unique-identifier="pub-identifier">
+  <metadata>
+    <dc:identifier id="pub-identifier">_simple_book</dc:identifier>
+    <meta id="meta-identifier" property="dcterms:identifier">_simple_book</meta>
+    <dc:title id="pub-title">Prince Caspian</dc:title>
+    <meta property="dcterms:title" id="meta-title">Prince Caspian</meta>
+    <dc:language id="pub-language">en</dc:language>
+    <meta property="dcterms:language" id="meta-language">en</meta>
+    <meta property="dcterms:modified">2014-07-15T22:20:15Z</meta>
+    <!--The preceding date value is actually local time (not UTC) in UTC format because there is no function in XSLT 1.0 to generate a correct UTC time-->
+    <meta content="cover-image" name="cover"/>
+    <meta id="meta-creator3" property="dcterms:creator">C. S. Lewis</meta>
+    <dc:creator id="pub-creator3">C. S. Lewis</dc:creator>
+    <meta property="dcterms:date">2014-07-15</meta>
+    <dc:date>2014-07-15</dc:date>
+    <meta property="dcterms:publisher">epubBooks Classics</meta>
+    <dc:publisher>epubBooks Classics</dc:publisher>
+    <meta property="dcterms:rights">Copyright © 2014 epubBooks</meta>
+    <dc:rights>Copyright © 2014 epubBooks</dc:rights>
+    <meta property="dcterms:rightsHolder">epubBooks</meta>
+    <meta property="dcterms:subject">Children's Fantasy</meta>
+    <dc:subject>Children's Fantasy</dc:subject>
+    <meta property="dcterms:subject">Children's Adventure Stories</meta>
+    <dc:subject>Children's Adventure Stories</dc:subject>
+  </metadata>
+  <manifest>
+    <item id="ncx" href="toc.ncx" media-type="application/x-dtbncx+xml"/>
+    <item id="htmltoc" properties="nav" media-type="application/xhtml+xml" href="bk01-toc.xhtml"/>
+    <item media-type="text/css" id="html-css" href="epubbooks.css"/>
+    <item media-type="text/css" id="docbook-css" href="docbook-epub.css"/>
+    <item id="cover" href="cover.xhtml" media-type="application/xhtml+xml"/>
+    <item id="cover-image" properties="cover-image" href="bookcover-generated.jpg" media-type="image/jpeg"/>
+    <item id="id-idp140717014803840" href="index.xhtml" media-type="application/xhtml+xml"/>
+    <item id="id-idp140717015288752" href="ch01.xhtml" media-type="application/xhtml+xml"/>
+    <item id="id-idp140717015596480" href="ch02.xhtml" media-type="application/xhtml+xml"/>
+    <item id="id-idp140717014937280" href="ch03.xhtml" media-type="application/xhtml+xml"/>
+    <item id="id-idp140717015385360" href="ch04.xhtml" media-type="application/xhtml+xml"/>
+    <item id="id-idp140717015486384" href="ch05.xhtml" media-type="application/xhtml+xml"/>
+    <item id="id-idp140717015593520" href="ch06.xhtml" media-type="application/xhtml+xml"/>
+    <item id="id-idp140716890745984" href="ch07.xhtml" media-type="application/xhtml+xml"/>
+    <item id="id-idp140716955959632" href="ch08.xhtml" media-type="application/xhtml+xml"/>
+    <item id="id-idp140716987447168" href="ch09.xhtml" media-type="application/xhtml+xml"/>
+    <item id="id-idp140716955691280" href="ch10.xhtml" media-type="application/xhtml+xml"/>
+    <item id="id-idp140716956025232" href="ch11.xhtml" media-type="application/xhtml+xml"/>
+    <item id="id-idp140716987174192" href="ch12.xhtml" media-type="application/xhtml+xml"/>
+    <item id="id-idp140716955971440" href="ch13.xhtml" media-type="application/xhtml+xml"/>
+    <item id="id-idp140716955760800" href="ch14.xhtml" media-type="application/xhtml+xml"/>
+    <item id="id-idp140716955783872" href="ch15.xhtml" media-type="application/xhtml+xml"/>
+  </manifest>
+  <spine toc="ncx">
+    <itemref idref="cover" linear="no"/>
+    <itemref idref="htmltoc" linear="yes"/>
+    <itemref idref="id-idp140717014803840"/>
+    <itemref idref="id-idp140717015288752"/>
+    <itemref idref="id-idp140717015596480"/>
+    <itemref idref="id-idp140717014937280"/>
+    <itemref idref="id-idp140717015385360"/>
+    <itemref idref="id-idp140717015486384"/>
+    <itemref idref="id-idp140717015593520"/>
+    <itemref idref="id-idp140716890745984"/>
+    <itemref idref="id-idp140716955959632"/>
+    <itemref idref="id-idp140716987447168"/>
+    <itemref idref="id-idp140716955691280"/>
+    <itemref idref="id-idp140716956025232"/>
+    <itemref idref="id-idp140716987174192"/>
+    <itemref idref="id-idp140716955971440"/>
+    <itemref idref="id-idp140716955760800"/>
+    <itemref idref="id-idp140716955783872"/>
+  </spine>
+  <guide>
+    <reference href="cover.xhtml" type="cover" title="Cover"/>
+    <reference href="bk01-toc.xhtml" type="toc" title="Table of Contents"/>
+  </guide>
+</package>
