@@ -1,86 +1,125 @@
 import AdmZip from "adm-zip";
-import fs from 'node:fs';
-
+import fs from "node:fs";
+import { XMLParser, XMLBuilder } from "fast-xml-parser";
 
 // unzip epub file
 export function decompressEpub(filePath: string, distFolder: string) {
-    const zip = new AdmZip(filePath);
-    zip.extractAllTo(distFolder);
+  const zip = new AdmZip(filePath);
+  zip.extractAllTo(distFolder);
 }
 
 // make folder to an epub file
 export function compressToEpub(fileName: string) {
-    const folderName = 'compressed';
-    try {
+  const folderName = "compressed";
+  try {
     if (!fs.existsSync(folderName)) {
-        fs.mkdirSync(folderName);
+      fs.mkdirSync(folderName);
     }
-    } catch (err) {
-        console.error(err);
-    }
+  } catch (err) {
+    console.error(err);
+  }
 
-    const zip = new AdmZip();
-    zip.addLocalFolder("./extracted/" + fileName);
-    zip.writeZip("compressed/" + fileName + ".epub");
-    console.log("Compress successful");
-};
+  const zip = new AdmZip();
+  zip.addLocalFolder("./extracted/" + fileName);
+  zip.writeZip("compressed/" + fileName + ".epub");
+  console.log("Compress successful");
+}
 
 // handle epub
-export function modifyEpub(filePath: string, manifestItem: string, spineItem: string) {
-    const zip = new AdmZip(filePath);
-    const zipEntries = zip.getEntries(); // an array of ZipEntry records
-    let newContent = "";
+export function modifyEpub(
+  filePath: string,
+  manifestItem: {id:string, href:string, 'media-type':string},
+  spineItem: {idref: string}
+) {
+  const xmlData = getOPFFile(filePath);
+  if (!xmlData) {
+    return "No opf file";
+  }
 
-    let entryIdx = 0;
-    let zipEntry = zipEntries[entryIdx];
+  const options = {
+    ignoreAttributes: false,
+    // preserveOrder: true,
+    suppressEmptyNode: true,
+    format: true,
+  };
+  const parser = new XMLParser(options);
 
-    while(entryIdx < zipEntries.length && !zipEntry.entryName.startsWith("OEBPS") && !zipEntry.entryName.endsWith(".opf")) {
-        entryIdx += 1;
-        zipEntry = zipEntries[entryIdx];
-    }
+  let obj = parser.parse(xmlData);
+//   console.dir(obj, { depth: 15 });
 
-    if (zipEntry.entryName.startsWith("OEBPS") && zipEntry.entryName.endsWith(".opf")) {
-        const contentAsText = zip.readAsText(zipEntry.entryName).split("\n");
-        const contentLength = contentAsText.length
-        let manifestIdx = 0;
 
-        while(manifestIdx < contentLength && !contentAsText[manifestIdx].includes("<manifest>")) {
-            manifestIdx += 1;
-        }
+  const manifestIdx = getItemIndex(
+    obj.package.manifest.item,
+    "@_href",
+    "index.xhtml"
+  );
+  console.log("idx", manifestIdx);
 
-        const insertIndex = manifestIdx + 3;
-        const nextLine = contentAsText[insertIndex]
-        const spaceCount = nextLine.match(/([\s]+)/g)!.length
-        const spaces = (" ").repeat(spaceCount);
+  if (manifestIdx) {
+    obj.package.manifest.item.splice(manifestIdx, 0, {
+            '@_id': manifestItem.id,
+            '@_href': manifestItem.href,
+            '@_media-type': manifestItem["media-type"]
+    });
+  } else {
+    return "No manifest tag";
+  }
 
-        contentAsText.splice(insertIndex, 0, spaces + manifestItem);
-        newContent = contentAsText.join("\n");
+  const spineIdx = getItemIndex(
+    obj.package.spine.itemref,
+    "@_idref",
+    "htmltoc"
+  );
+  console.log("idx", spineIdx);
 
-        // insert item at spine tag
-        let spineIdx = 0;
-        while(spineIdx < contentLength && !contentAsText[manifestIdx].includes("<spine>")) {
-            spineIdx += 1;
-        }
-        const spineInsertIdx = spineIdx + 3;
-        const nextSpineItem = contentAsText[spineInsertIdx]
-        const spaceCountNext = nextSpineItem.match(/([\s]+)/g)!.length
-        const spacesNext = (" ").repeat(spaceCountNext);
+  if(spineIdx) {
+    obj.package.spine.itemref.splice(spineIdx, 0, {
+        '@_idref': spineItem.idref,
+    });
+  }
 
-        contentAsText.splice(spineInsertIdx, 0, spacesNext + spineItem);
-        newContent = contentAsText.join("\n");
+  // parse object into XML
+  const builder = new XMLBuilder(options);
+  const xmlContent = builder.build(obj);
 
-        stringToFile(newContent, "extracted/okakura/OEBPS/package.opf");
-    };
-
-    return newContent;
+  stringToFile(xmlContent, "extracted/okakura/OEBPS/package.opf");
 }
+
+// get the opf file as string
+function getOPFFile(filePath: string) {
+  const zip = new AdmZip(filePath);
+  const zipEntries = zip.getEntries(); // an array of ZipEntry records
+
+  for (let i = 0; i < zipEntries.length; i++) {
+    const zipEntry = zipEntries[i];
+
+    if (
+      zipEntry.entryName.startsWith("OEBPS") &&
+      zipEntry.entryName.endsWith(".opf")
+    ) {
+      return zip.readAsText(zipEntry.entryName);
+    }
+  }
+  return null;
+}
+
+// get index of item from an object
+function getItemIndex(obj: any, ref: string, target: string) {
+  for (let i = 0; i < obj.length; i++) {
+    if (obj[i][ref] === target) {
+      return i + 1;
+    }
+  }
+  return null;
+}
+
 
 // write to opf file
 function stringToFile(content: string, path: string) {
-    fs.writeFileSync(path, content);
+  fs.writeFileSync(path, content);
 }
 
 // insert visual TOC files into target extracted folder
 function insertFilesInFolder() {
-
+    
 }
