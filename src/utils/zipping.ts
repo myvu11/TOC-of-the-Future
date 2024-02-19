@@ -25,15 +25,16 @@ export function compressToEpub(fileName: string) {
   console.log("Compress successful");
 }
 
-// handle epub
-export function modifyEpub(
-  filePath: string,
-  manifestItem: {id:string, href:string, 'media-type':string},
-  spineItem: {idref: string}
+// handle opf file
+export function modifyOPF(
+  epubPath: string,
+  manifestItem: { id: string; href: string; "media-type": string },
+  spineItem: { idref: string }
 ) {
-  const xmlData = getOPFFile(filePath);
+  const xmlData = getFile(epubPath, "OEBPS", ".opf");
   if (!xmlData) {
-    return "No opf file";
+    console.log("No opf file")
+    return ;
   }
 
   const options = {
@@ -45,24 +46,23 @@ export function modifyEpub(
   const parser = new XMLParser(options);
 
   let obj = parser.parse(xmlData);
-//   console.dir(obj, { depth: 15 });
-
+  //   console.dir(obj, { depth: 15 });
 
   const manifestIdx = getItemIndex(
     obj.package.manifest.item,
     "@_href",
     "index.xhtml"
   );
-  console.log("idx", manifestIdx);
 
   if (manifestIdx) {
     obj.package.manifest.item.splice(manifestIdx, 0, {
-            '@_id': manifestItem.id,
-            '@_href': manifestItem.href,
-            '@_media-type': manifestItem["media-type"]
+      "@_id": manifestItem.id,
+      "@_href": manifestItem.href,
+      "@_media-type": manifestItem["media-type"],
     });
   } else {
-    return "No manifest tag";
+    console.log("No manifest tag");
+    return ;
   }
 
   const spineIdx = getItemIndex(
@@ -70,33 +70,68 @@ export function modifyEpub(
     "@_idref",
     "htmltoc"
   );
-  console.log("idx", spineIdx);
 
-  if(spineIdx) {
+  if (spineIdx) {
     obj.package.spine.itemref.splice(spineIdx, 0, {
-        '@_idref': spineItem.idref,
+      "@_idref": spineItem.idref,
     });
+  } else {
+    console.log("No spine tag")
+    return
   }
 
-  // parse object into XML
-  const builder = new XMLBuilder(options);
-  const xmlContent = builder.build(obj);
+  if (manifestIdx && spineIdx) {
+    // parse object into XML
+    const builder = new XMLBuilder(options);
+    const xmlContent = builder.build(obj);
 
-  stringToFile(xmlContent, "extracted/okakura/OEBPS/package.opf");
+    stringToFile(xmlContent, "extracted/okakura/OEBPS/package.opf");
+    console.log("opf file modified")
+    return ;
+  }
+  console.log("opf file not modified")
+  return ;
+
 }
 
-// get the opf file as string
-function getOPFFile(filePath: string) {
-  const zip = new AdmZip(filePath);
-  const zipEntries = zip.getEntries(); // an array of ZipEntry records
+export function modifyTOC(epubPath: string) {
+  const xmlData = getFile(epubPath, "OEBPS", ".xhtml", "toc");
+  if(!xmlData) {
+    console.log("No TOC file")
+    return
+  }
+  const options = {
+    ignoreAttributes: false,
+    // preserveOrder: true,
+    suppressEmptyNode: true,
+    format: true,
+  };
+  const parser = new XMLParser(options);
+
+  let obj = parser.parse(xmlData);
+  console.log("obj", obj.html.body.div.nav.ol.li)
+
+}
+
+// get the file as string
+function getFile(
+  epubPath: string,
+  folder: string,
+  fileType: string,
+  name = ""
+) {
+  const zip = new AdmZip(epubPath);
+  const zipEntries = zip.getEntries();
 
   for (let i = 0; i < zipEntries.length; i++) {
     const zipEntry = zipEntries[i];
 
     if (
-      zipEntry.entryName.startsWith("OEBPS") &&
-      zipEntry.entryName.endsWith(".opf")
+      zipEntry.entryName.startsWith(folder) &&
+      zipEntry.entryName.endsWith(fileType) &&
+      zipEntry.entryName.includes(name)
     ) {
+      console.log("got file: ", zipEntry.entryName)
       return zip.readAsText(zipEntry.entryName);
     }
   }
@@ -113,13 +148,15 @@ function getItemIndex(obj: any, ref: string, target: string) {
   return null;
 }
 
-
 // write to opf file
 function stringToFile(content: string, path: string) {
   fs.writeFileSync(path, content);
 }
 
 // insert visual TOC files into target extracted folder
-function insertFilesInFolder() {
-    
+export function moveFilesToFolder(file: string, targetPath: string) {
+  fs.rename(file, targetPath, function (err) {
+    if (err) throw err;
+    console.log("Succesfully renamed");
+  });
 }
