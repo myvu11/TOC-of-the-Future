@@ -29,7 +29,8 @@ export function compressToEpub(fileName: string) {
 export function modifyOPF(
   epubPath: string,
   manifestItem: { id: string; href: string; "media-type": string },
-  spineItem: { idref: string }
+  spineItem: { idref: string },
+  targetModifiedFIle: string
 ) {
   const xmlData = getFile(epubPath, "OEBPS", ".opf");
   if (!xmlData) {
@@ -85,7 +86,7 @@ export function modifyOPF(
     const builder = new XMLBuilder(options);
     const xmlContent = builder.build(obj);
 
-    stringToFile(xmlContent, "extracted/okakura/OEBPS/package.opf");
+    stringToFile(xmlContent, targetModifiedFIle);
     console.log("opf file modified")
     return ;
   }
@@ -113,12 +114,13 @@ export function modifyTOC(epubPath: string) {
 
 }
 
-// get the file as string
-function getFile(
+// get the file based on type and return content as string
+export function getFile(
   epubPath: string,
   folder: string,
   fileType: string,
-  name = ""
+  name: string = "",
+
 ) {
   const zip = new AdmZip(epubPath);
   const zipEntries = zip.getEntries();
@@ -138,6 +140,36 @@ function getFile(
   return null;
 }
 
+
+// get array of paths
+export function getFilePaths(
+  epubPath: string,
+  folder: string,
+  fileType: string,
+
+) {
+  console.log("start getFilePaths")
+  const zip = new AdmZip(epubPath);
+  const zipEntries = zip.getEntries();
+  const paths = []
+  console.log("start getFilePaths")
+
+  for (let i = 0; i < zipEntries.length; i++) {
+    const entryName = zipEntries[i].entryName;
+
+    if (
+      folder && entryName.startsWith(folder) &&
+      entryName.endsWith(fileType) &&
+      !entryName.includes("index") && !entryName.includes("cover") &&
+      !entryName.includes("toc")
+    ) {
+      console.log("entry", entryName)
+      paths.push(entryName);
+    }
+  }
+  return paths;
+}
+
 // get index of item from an object
 function getItemIndex(obj: any, ref: string, target: string) {
   for (let i = 0; i < obj.length; i++) {
@@ -148,7 +180,7 @@ function getItemIndex(obj: any, ref: string, target: string) {
   return null;
 }
 
-// write to opf file
+// write content to opf file
 function stringToFile(content: string, path: string) {
   fs.writeFileSync(path, content);
 }
