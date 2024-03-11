@@ -25,10 +25,17 @@ export function compressToEpub(fileName: string) {
   console.log("Compress successful");
 }
 
-// handle opf file
+function insertItemToManifest(items:any[]) {
+  for(let i = 0; i < items.length; i++) {
+
+  }
+}
+
+// modify opf file
 export function modifyOPF(
   epubPath: string,
   manifestItem: { id: string; href: string; "media-type": string },
+  manifestItemJS: { id: string; href: string; "media-type": string },
   spineItem: { idref: string },
   targetModifiedFIle: string
 ) {
@@ -49,11 +56,18 @@ export function modifyOPF(
   let obj = parser.parse(xmlData);
   //   console.dir(obj, { depth: 15 });
 
+  // const manifestIdx = getItemIndex(
+  //   obj.package.manifest.item,
+  //   "@_href",
+  //   "index.xhtml"
+  // );
+
   const manifestIdx = getItemIndex(
     obj.package.manifest.item,
-    "@_href",
-    "index.xhtml"
+    "@_id",
+    ["pg-header", "index.xhtml"]
   );
+
 
   if (manifestIdx) {
     obj.package.manifest.item.splice(manifestIdx, 0, {
@@ -66,10 +80,23 @@ export function modifyOPF(
     return ;
   }
 
+
+  obj.package.manifest.item.splice(0, 0, {
+    "@_id": manifestItemJS.id,
+    "@_href": manifestItemJS.href,
+    "@_media-type": manifestItemJS["media-type"],
+  });
+
+  // const spineIdx = getItemIndex(
+  //   obj.package.spine.itemref,
+  //   "@_idref",
+  //   "htmltoc"
+  // );
+
   const spineIdx = getItemIndex(
     obj.package.spine.itemref,
     "@_idref",
-    "htmltoc"
+    ["pg-header", "htmltoc"]
   );
 
   if (spineIdx) {
@@ -92,7 +119,6 @@ export function modifyOPF(
   }
   console.log("opf file not modified")
   return ;
-
 }
 
 export function modifyTOC(epubPath: string) {
@@ -141,18 +167,16 @@ export function getFile(
 }
 
 
-// get array of paths
+// get array of file path names
 export function getFilePaths(
   epubPath: string,
   folder: string,
   fileType: string,
 
 ) {
-  console.log("start getFilePaths")
   const zip = new AdmZip(epubPath);
   const zipEntries = zip.getEntries();
-  const paths = []
-  console.log("start getFilePaths")
+  const paths:string[] = []
 
   for (let i = 0; i < zipEntries.length; i++) {
     const entryName = zipEntries[i].entryName;
@@ -171,10 +195,12 @@ export function getFilePaths(
 }
 
 // get index of item from an object
-function getItemIndex(obj: any, ref: string, target: string) {
+function getItemIndex(obj: any, ref: string, target: string[]) {
   for (let i = 0; i < obj.length; i++) {
-    if (obj[i][ref] === target) {
-      return i + 1;
+    for(let j = 0; j < target.length; j++) {
+      if (obj[i][ref] === target[j]) {
+        return i + 1;
+      }
     }
   }
   return null;
@@ -186,9 +212,20 @@ function stringToFile(content: string, path: string) {
 }
 
 // insert visual TOC files into target extracted folder
-export function moveFilesToFolder(file: string, targetPath: string) {
-  fs.rename(file, targetPath, function (err) {
+export function copyFilesToFolder(source: string, targetFolder: string, targetName: string) {
+  console.log("start")
+  if(!fs.existsSync(targetFolder + "/" + targetName)) {
+    console.log("in if")
+    fs.mkdirSync(targetFolder, {recursive: true})
+    if(fs.existsSync(targetFolder + "/" + targetName)) {
+      console.log("exists")
+    }
+  }
+  if(targetName === "") {
+    fs.cpSync(source, targetFolder)
+  }
+  fs.copyFile(source, targetFolder + "/" + targetName, function (err) {
     if (err) throw err;
-    console.log("Succesfully renamed");
+    console.log("Succesfully copied");
   });
 }
