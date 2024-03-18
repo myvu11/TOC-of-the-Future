@@ -1,4 +1,3 @@
-
 /*
  * ATTENTION: The "eval" devtool has been used (maybe by default in mode: "development").
  * This devtool is neither made for production nor for readable output files.
@@ -17,7 +16,7 @@
   \**********************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var d3__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! d3 */ \"./node_modules/d3/src/index.js\");\n\r\n\r\nconst margin = { top: 50, right: 50, bottom: 50, left: 50 };\r\nconst width = 1050 - margin.left - margin.right;\r\nconst height = 1050 - margin.top - margin.bottom;\r\n\r\nconst rectWidth = 200;\r\nconst rectHeight = 200;\r\n\r\nconst rectData = [0, rectWidth + 60, rectWidth * 2 + 60 * 2];\r\n\r\n// create svg element:\r\nconst svg = d3__WEBPACK_IMPORTED_MODULE_0__.select(\"#rect\")\r\n  .append(\"svg\")\r\n  .attr(\"width\", width)\r\n  .attr(\"height\", height);\r\n\r\nconst g = svg\r\n  .selectAll(\".rect\")\r\n  .data(rectData)\r\n  .enter()\r\n  .append(\"g\")\r\n  .classed(\"rect\", true);\r\n\r\ng.append(\"rect\")\r\n  .attr(\"width\", rectWidth)\r\n  .attr(\"height\", rectHeight)\r\n  .attr(\"x\", function (d) {\r\n    return d;\r\n  })\r\n  .attr(\"y\", 0)\r\n  .attr(\"stroke\", \"black\")\r\n  .attr(\"fill\", \"white\");\r\n\n\n//# sourceURL=webpack://visual-toc/./templates/scripts/toc.ts?");
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var d3__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! d3 */ \"./node_modules/d3/src/index.js\");\n\r\n\r\nconst margin = { top: 5, right: 5, bottom: 5, left: 5 };\r\nconst width = 375 - margin.left - margin.right;\r\nconst height = 455 - margin.top - margin.bottom;\r\n\r\n\r\nconst chapterCount = 5;\r\nconst colCount = 4;\r\nconst rectSpacingHorizontal = 10;\r\nconst rectSpacingVertical = 20;\r\nconst rectWidth = Math.floor(width/(colCount + 1)-rectSpacingHorizontal);\r\nconst rectHeight = 50;\r\nconst rowCount = Math.round(chapterCount / colCount);\r\n\r\n// const rectData = [0, rectWidth + rectSpacing, rectWidth * 2 + rectSpacing * 2];\r\n\r\n\r\n// make chapter matrix layout\r\nfunction initChapterRectangles() {\r\n  let rectData = [];\r\n\r\n  for(let i = 0; i < colCount; i++) {\r\n    for(let j = 0; j < rowCount; j++) {\r\n      if(rectData.length < chapterCount) {\r\n        rectData.push({x: rectWidth*i + rectSpacingHorizontal*i, y: rectHeight*j + rectSpacingVertical*j})\r\n      }\r\n    }\r\n  }\r\n  return rectData\r\n}\r\n\r\nconst rectData = initChapterRectangles()\r\nconsole.log(\"rectData\", rectData)\r\n\r\n// create svg element:\r\nconst svg = d3__WEBPACK_IMPORTED_MODULE_0__.select(\"#rect\")\r\n  .append(\"svg\")\r\n  .attr(\"width\", width)\r\n  // .attr(\"height\", height);\r\n\r\nconst g = svg\r\n  .selectAll(\".rect\")\r\n  .data(rectData)\r\n  .enter()\r\n  .append(\"g\")\r\n  .classed(\"rect\", true);\r\n\r\ng.append(\"rect\")\r\n  .attr(\"width\", rectWidth)\r\n  .attr(\"height\", rectHeight)\r\n  .attr(\"x\", function (d) {\r\n    return d.x;\r\n  })\r\n  .attr(\"y\", function (d) {\r\n    return d.y;\r\n  })\r\n  .attr(\"stroke\", \"black\")\r\n  .attr(\"fill\", \"white\");\r\n\r\n\r\n  var svgContainer = d3__WEBPACK_IMPORTED_MODULE_0__.select(\"div#container\")\r\n  .append(\"svg\")\r\n  .attr(\"preserveAspectRatio\", \"xMinYMin meet\")\r\n  .attr(\"viewBox\", \"0 0 300 300\")\r\n  .classed(\"svg-content\", true);\r\n\r\n  const graph = svgContainer\r\n  .selectAll(\".div#container\")\r\n  .data(rectData)\r\n  .enter()\r\n  .append(\"g\")\r\n  .classed(\"rect\", true);\r\n\r\ngraph.append(\"rect\")\r\n  .attr(\"width\", rectWidth)\r\n  .attr(\"height\", rectHeight)\r\n  .attr(\"x\", function (d) {\r\n    return d.x;\r\n  })\r\n  .attr(\"y\", function (d) {\r\n    return d.y;\r\n  })\r\n  .attr(\"stroke\", \"black\")\r\n  .attr(\"fill\", \"white\");\r\n\n\n//# sourceURL=webpack://visual-toc/./templates/scripts/toc.ts?");
 
 /***/ }),
 
@@ -5675,7 +5674,7 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpac
 /************************************************************************/
 /******/ 	// The module cache
 /******/ 	var __webpack_module_cache__ = {};
-/******/
+/******/ 	
 /******/ 	// The require function
 /******/ 	function __webpack_require__(moduleId) {
 /******/ 		// Check if module is in cache
@@ -5689,14 +5688,14 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpac
 /******/ 			// no module.loaded needed
 /******/ 			exports: {}
 /******/ 		};
-/******/
+/******/ 	
 /******/ 		// Execute the module function
 /******/ 		__webpack_modules__[moduleId](module, module.exports, __webpack_require__);
-/******/
+/******/ 	
 /******/ 		// Return the exports of the module
 /******/ 		return module.exports;
 /******/ 	}
-/******/
+/******/ 	
 /************************************************************************/
 /******/ 	/* webpack/runtime/define property getters */
 /******/ 	(() => {
@@ -5709,12 +5708,12 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpac
 /******/ 			}
 /******/ 		};
 /******/ 	})();
-/******/
+/******/ 	
 /******/ 	/* webpack/runtime/hasOwnProperty shorthand */
 /******/ 	(() => {
 /******/ 		__webpack_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
 /******/ 	})();
-/******/
+/******/ 	
 /******/ 	/* webpack/runtime/make namespace object */
 /******/ 	(() => {
 /******/ 		// define __esModule on exports
@@ -5725,13 +5724,13 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpac
 /******/ 			Object.defineProperty(exports, '__esModule', { value: true });
 /******/ 		};
 /******/ 	})();
-/******/
+/******/ 	
 /************************************************************************/
-/******/
+/******/ 	
 /******/ 	// startup
 /******/ 	// Load entry module and return exports
 /******/ 	// This entry module can't be inlined because the eval devtool is used.
 /******/ 	var __webpack_exports__ = __webpack_require__("./templates/scripts/toc.ts");
-/******/
+/******/ 	
 /******/ })()
 ;

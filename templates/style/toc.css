@@ -1,0 +1,14 @@
+h2 {
+  text-align: center;
+}
+.toc {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-auto-rows: 10rem;
+  page-break-after: always;
+  text-align: center;
+}
+.toc-item {
+  border: solid black;
+  margin: 0.5rem
+}

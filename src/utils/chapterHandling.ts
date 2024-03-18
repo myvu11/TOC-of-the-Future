@@ -1,6 +1,7 @@
 import { getFilePaths } from "./zipping.js";
 import { parse } from 'node-html-parser';
 import fs from "node:fs";
+import { XMLParser, XMLBuilder } from "fast-xml-parser";
 
 
 
@@ -10,6 +11,11 @@ const wordsPerMinute: Record <string,number> = {slow: 100, average: 183, fast: 2
 // get all chapter path anmes
 function getChapterFilePaths(epubPath:string) {
     const paths = getFilePaths(epubPath, "OEBPS", "html")
+    console.log("path", paths[0])
+    isChapter(paths[0])
+    // for(let i = 0; i < getFilePaths.length; i++) {
+
+    // }
     return paths
 }
 
@@ -26,6 +32,21 @@ function getTextFromXHTML(html:string) {
     const content = innerText.replace(firstChild, "")
     return content
 };
+
+// check if file is a chapter
+function isChapter(xmlData:string) {
+
+    const options = {
+        ignoreAttributes: false,
+        // preserveOrder: true,
+        suppressEmptyNode: true,
+        format: true,
+    };
+    const parser = new XMLParser(options);
+
+    let obj = parser.parse(xmlData);
+    console.log("obj", obj)
+}
 
 
 // get the time of reading a given text
@@ -47,8 +68,14 @@ function formatTime(duration: number) {
 }
 
 
+
+
+export function getChapterCount(epubPath: string) {
+    return getChapterFilePaths(epubPath).length
+}
+
 // get the reading time of each chapter in epub file
-export function getReadingTimeFromChapters(epubPath: string, extractedPath: string) {
+export function getReadingTimeChapters(epubPath: string, extractedPath: string) {
     const chapterPaths = getChapterFilePaths(epubPath)
     const readingTimeChapters: Record<string,string> = {}
     for(let i = 0; i < chapterPaths.length; i++) {

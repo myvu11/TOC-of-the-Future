@@ -25,11 +25,6 @@ export function compressToEpub(fileName: string) {
   console.log("Compress successful");
 }
 
-function insertItemToManifest(items:any[]) {
-  for(let i = 0; i < items.length; i++) {
-
-  }
-}
 
 // modify opf file
 export function modifyOPF(
@@ -39,7 +34,7 @@ export function modifyOPF(
   spineItem: { idref: string },
   targetModifiedFIle: string
 ) {
-  const xmlData = getFile(epubPath, "OEBPS", ".opf");
+  const xmlData = findFile(epubPath, "OEBPS", ".opf");
   if (!xmlData) {
     console.log("No opf file")
     return ;
@@ -56,17 +51,19 @@ export function modifyOPF(
   let obj = parser.parse(xmlData);
   //   console.dir(obj, { depth: 15 });
 
-  // const manifestIdx = getItemIndex(
-  //   obj.package.manifest.item,
-  //   "@_href",
-  //   "index.xhtml"
-  // );
-
-  const manifestIdx = getItemIndex(
+  let manifestIdx = getItemIndex(
     obj.package.manifest.item,
-    "@_id",
-    ["pg-header", "index.xhtml"]
+    "@_href",
+    ["index.xhtml"]
   );
+
+  if(!manifestIdx) {
+    manifestIdx = getItemIndex(
+      obj.package.manifest.item,
+      "@_id",
+      ["pg-header"]
+    );
+  }
 
 
   if (manifestIdx) {
@@ -80,18 +77,12 @@ export function modifyOPF(
     return ;
   }
 
-
   obj.package.manifest.item.splice(0, 0, {
     "@_id": manifestItemJS.id,
     "@_href": manifestItemJS.href,
     "@_media-type": manifestItemJS["media-type"],
   });
 
-  // const spineIdx = getItemIndex(
-  //   obj.package.spine.itemref,
-  //   "@_idref",
-  //   "htmltoc"
-  // );
 
   const spineIdx = getItemIndex(
     obj.package.spine.itemref,
@@ -114,34 +105,16 @@ export function modifyOPF(
     const xmlContent = builder.build(obj);
 
     stringToFile(xmlContent, targetModifiedFIle);
-    console.log("opf file modified")
+    console.log("File .opf modified")
     return ;
   }
-  console.log("opf file not modified")
+  console.log("File .opf not modified")
   return ;
 }
 
-export function modifyTOC(epubPath: string) {
-  const xmlData = getFile(epubPath, "OEBPS", ".xhtml", "toc");
-  if(!xmlData) {
-    console.log("No TOC file")
-    return
-  }
-  const options = {
-    ignoreAttributes: false,
-    // preserveOrder: true,
-    suppressEmptyNode: true,
-    format: true,
-  };
-  const parser = new XMLParser(options);
-
-  let obj = parser.parse(xmlData);
-  console.log("obj", obj.html.body.div.nav.ol.li)
-
-}
 
 // get the file based on type and return content as string
-export function getFile(
+export function findFile(
   epubPath: string,
   folder: string,
   fileType: string,
@@ -187,7 +160,7 @@ export function getFilePaths(
       !entryName.includes("index") && !entryName.includes("cover") &&
       !entryName.includes("toc")
     ) {
-      console.log("entry", entryName)
+      // console.log("entry", entryName)
       paths.push(entryName);
     }
   }
@@ -213,19 +186,17 @@ function stringToFile(content: string, path: string) {
 
 // insert visual TOC files into target extracted folder
 export function copyFilesToFolder(source: string, targetFolder: string, targetName: string) {
-  console.log("start")
   if(!fs.existsSync(targetFolder + "/" + targetName)) {
-    console.log("in if")
-    fs.mkdirSync(targetFolder, {recursive: true})
-    if(fs.existsSync(targetFolder + "/" + targetName)) {
-      console.log("exists")
-    }
+    fs.mkdirSync(targetFolder, {recursive: true});
   }
-  if(targetName === "") {
-    fs.cpSync(source, targetFolder)
+  fs.copyFileSync(source, targetFolder + "/" + targetName);
+  if(fs.existsSync(targetFolder + "/" + targetName)) {
+    console.log("File copied")
   }
-  fs.copyFile(source, targetFolder + "/" + targetName, function (err) {
-    if (err) throw err;
-    console.log("Succesfully copied");
-  });
+}
+
+export function insertTOCFiles(extractedFolder: string) {
+  copyFilesToFolder("dist/toc.xhtml", extractedFolder + "/OEBPS", "toc.xhtml");
+  copyFilesToFolder("dist/toc.css", extractedFolder + "/OEBPS", "toc.css");
+  copyFilesToFolder("dist/toc.js", extractedFolder + "/OEBPS", "toc.js");
 }

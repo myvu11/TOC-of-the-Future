@@ -19,10 +19,10 @@ module.exports = {
     new CopyPlugin({
       patterns: [
         {
-          from: "templates/visualization-epub/layoutRectangle.xhtml",
+          from: "templates/html/toc.xhtml",
           to: "./",
         },
-        //   { from: 'src/style.css', to: './' },
+          { from: 'templates/style/toc.css', to: './' },
       ],
     }),
   ],
