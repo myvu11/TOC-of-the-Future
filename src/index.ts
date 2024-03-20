@@ -1,3 +1,4 @@
+import { startGPT } from "./utils/chatGPT-api.js";
 import { generateTOC } from "./utils/generateTOC.js";
 import { modifyOPF, compressToEpub, decompressEpub, copyFilesToFolder, insertTOCFiles } from "./utils/zipping.js";
 
@@ -17,8 +18,10 @@ let opfFile = "content.opf"
 
 
 
-decompressEpub(epubPath, extractedFolder);
+// decompressEpub(epubPath, extractedFolder);
 // generateTOC(epubPath)
 // insertTOCFiles(extractedFolder);
 // modifyOPF(epubPath, manifestItem, manifestItemJS, spineItem, extractedFolder + "/OEBPS/" + opfFile);
 // compressToEpub(compressFolder);
+
+startGPT();
