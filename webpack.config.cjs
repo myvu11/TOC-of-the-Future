@@ -22,8 +22,20 @@ module.exports = {
           from: "templates/html/toc.xhtml",
           to: "./",
         },
-          { from: 'templates/style/toc.css', to: './' },
+        { from: "templates/style/", to: "./" },
       ],
     }),
   ],
+  module: {
+    rules: [
+      {
+        test: /\.ts$/,
+        exclude: /node_modules/,
+        use: "ts-loader",
+      },
+    ],
+  },
+  resolve: {
+    extensions: [".ts", ".js", ".tsx"],
+  },
 };

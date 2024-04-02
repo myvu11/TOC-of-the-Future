@@ -1,4 +1,4 @@
-import { copyFilesToFolder, getFilePaths, findFile } from "./zipping.js";
+import { copyFilesToFolder, getFilePaths, getFileContent } from "./zipping.js";
 import { getReadingTimeChapters, getChapterCount } from "./chapterHandling.js";
 import fs from "node:fs";
 import { XMLParser, XMLBuilder } from "fast-xml-parser";
@@ -7,7 +7,7 @@ import { XMLParser, XMLBuilder } from "fast-xml-parser";
 
 // insert ebooks html head to toc template
 function insertHead(epubPath: string, destination: string) {
-    const xmlData = findFile(epubPath, "OEBPS", ".xhtml", "")
+    const xmlData = getFileContent(epubPath, "OEBPS", ".xhtml", "")
     if(!xmlData) {
         return "No xmlData"
     }
@@ -60,9 +60,8 @@ function copyTemplates() {
 }
 
 
-
 export function generateTOC(epubPath: string) {
-    // copyTemplates();
+    copyTemplates();
     // const chapterCount = getChapterCount(epubPath);
     // insertChapterCount(chapterCount);
     // reading time

@@ -34,7 +34,7 @@ export function modifyOPF(
   spineItem: { idref: string },
   targetModifiedFIle: string
 ) {
-  const xmlData = findFile(epubPath, "OEBPS", ".opf");
+  const xmlData = getFileContent(epubPath, "OEBPS", ".opf");
   if (!xmlData) {
     console.log("No opf file")
     return ;
@@ -61,7 +61,7 @@ export function modifyOPF(
     manifestIdx = getItemIndex(
       obj.package.manifest.item,
       "@_id",
-      ["pg-header"]
+      ["pg-header", "Cover.html"]
     );
   }
 
@@ -87,7 +87,7 @@ export function modifyOPF(
   const spineIdx = getItemIndex(
     obj.package.spine.itemref,
     "@_idref",
-    ["pg-header", "htmltoc"]
+    ["pg-header", "htmltoc", "Cover.html"]
   );
 
   if (spineIdx) {
@@ -114,7 +114,7 @@ export function modifyOPF(
 
 
 // get the file based on type and return content as string
-export function findFile(
+export function getFileContent(
   epubPath: string,
   folder: string,
   fileType: string,
@@ -196,7 +196,7 @@ export function copyFilesToFolder(source: string, targetFolder: string, targetNa
 }
 
 export function insertTOCFiles(extractedFolder: string) {
-  copyFilesToFolder("dist/toc.xhtml", extractedFolder + "/OEBPS", "toc.xhtml");
-  copyFilesToFolder("dist/toc.css", extractedFolder + "/OEBPS", "toc.css");
-  copyFilesToFolder("dist/toc.js", extractedFolder + "/OEBPS", "toc.js");
+  copyFilesToFolder("dist/toc.xhtml", extractedFolder + "/OEBPS", "future-toc.xhtml");
+  copyFilesToFolder("dist/toc.css", extractedFolder + "/OEBPS", "future-toc.css");
+  copyFilesToFolder("dist/toc.js", extractedFolder + "/OEBPS", "future-toc.js");
 }

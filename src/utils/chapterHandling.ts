@@ -1,4 +1,4 @@
-import { getFilePaths } from "./zipping.js";
+import { getFileContent, getFilePaths } from "./zipping.js";
 import { parse } from 'node-html-parser';
 import fs from "node:fs";
 import { XMLParser, XMLBuilder } from "fast-xml-parser";
@@ -6,17 +6,13 @@ import { XMLParser, XMLBuilder } from "fast-xml-parser";
 
 
 // source - words per minute: wwww.thereadtime.com
-const wordsPerMinute: Record <string,number> = {slow: 100, average: 183, fast: 260}
+const Words_Per_Minute: Record <string,number> = {slow: 100, average: 183, fast: 260}
 
 // get all chapter path anmes
 function getChapterFilePaths(epubPath:string) {
     const paths = getFilePaths(epubPath, "OEBPS", "html")
-    console.log("path", paths[0])
-    isChapter(paths[0])
-    // for(let i = 0; i < getFilePaths.length; i++) {
-
-    // }
-    return paths
+    const chapterPaths = paths.filter(path => !path.toLowerCase().includes("cover"))
+    return chapterPaths
 }
 
 // extract the text content from a html file
@@ -34,7 +30,8 @@ function getTextFromXHTML(html:string) {
 };
 
 // check if file is a chapter
-function isChapter(xmlData:string) {
+// not finished. Later
+function isChapter(epubPath:string, path:string) {
 
     const options = {
         ignoreAttributes: false,
@@ -44,15 +41,21 @@ function isChapter(xmlData:string) {
     };
     const parser = new XMLParser(options);
 
+    const xmlData = getFileContent(epubPath, "", "", path)
+    if(xmlData === null) {
+        return false
+    }
     let obj = parser.parse(xmlData);
-    console.log("obj", obj)
+    // console.log("obj", obj)
+    // console.log("body", obj.html.body)
+    console.log("title", obj.html.body.div)
 }
 
 
 // get the time of reading a given text
 function getReadingDuration(text: string, pace: string = "average") {
     const wordCount = text.trim().split(/\s+/).length;
-    return wordCount / wordsPerMinute[pace]
+    return wordCount / Words_Per_Minute[pace]
 }
 
 // convert time duration in minutes to hours
@@ -67,9 +70,12 @@ function formatTime(duration: number) {
     return time.toString() + minuteUnit
 }
 
+function get() {
+
+}
 
 
-
+// get number of chapters
 export function getChapterCount(epubPath: string) {
     return getChapterFilePaths(epubPath).length
 }
