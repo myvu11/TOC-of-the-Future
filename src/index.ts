@@ -12,7 +12,7 @@ import { getChapterCount } from "./utils/chapterHandling.js";
 const epubPath = "./epub-files/Doyle, Artur Conan - Sherlock Holmes.epub";
 // const extractedFolder = "extracted/carroll";
 const extractedFolder = "extracted/conan";
-const compressFolder = "conan"
+const compressFolder = "conan3"
 const manifestItem = {id: "id-test", href: "future-toc.xhtml", 'media-type': "application/xhtml+xml"}
 const manifestItemJS = {id: "id-toc", href: "future-toc.js", 'media-type': "text/javascript"}
 const spineItem = {idref:"id-test"}
@@ -24,7 +24,7 @@ let opfFile = "content.opf"
 // generateTOC(epubPath)
 insertTOCFiles(extractedFolder);
 modifyOPF(epubPath, manifestItem, manifestItemJS, spineItem, extractedFolder + "/OEBPS/" + opfFile);
-compressToEpub(compressFolder);
+compressToEpub(extractedFolder, compressFolder);
 
 // getChapterCount(epubPath)
 

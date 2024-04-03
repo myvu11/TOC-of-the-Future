@@ -9,7 +9,7 @@ export function decompressEpub(filePath: string, distFolder: string) {
 }
 
 // make folder to an epub file
-export function compressToEpub(fileName: string) {
+export function compressToEpub(extractFileName:string, fileName: string) {
   const folderName = "compressed";
   try {
     if (!fs.existsSync(folderName)) {
@@ -20,7 +20,7 @@ export function compressToEpub(fileName: string) {
   }
 
   const zip = new AdmZip();
-  zip.addLocalFolder("./extracted/" + fileName);
+  zip.addLocalFolder("./" + extractFileName);
   zip.writeZip("compressed/" + fileName + ".epub");
   console.log("Compress successful");
 }
@@ -196,7 +196,9 @@ export function copyFilesToFolder(source: string, targetFolder: string, targetNa
 }
 
 export function insertTOCFiles(extractedFolder: string) {
-  copyFilesToFolder("dist/toc.xhtml", extractedFolder + "/OEBPS", "future-toc.xhtml");
-  copyFilesToFolder("dist/toc.css", extractedFolder + "/OEBPS", "future-toc.css");
-  copyFilesToFolder("dist/toc.js", extractedFolder + "/OEBPS", "future-toc.js");
+  copyFilesToFolder("dist/future-toc.xhtml", extractedFolder + "/OEBPS", "future-toc.xhtml");
+  copyFilesToFolder("dist/future-toc.css", extractedFolder + "/OEBPS", "future-toc.css");
+  copyFilesToFolder("dist/future-svg.css", extractedFolder + "/OEBPS", "future-svg.css");
+  copyFilesToFolder("dist/future-toc.js", extractedFolder + "/OEBPS", "future-toc.js");
+
 }

@@ -9,17 +9,17 @@ module.exports = {
     compress: true,
     port: 9000,
   },
-  entry: "./templates/scripts/toc.ts",
+  entry: "./templates/scripts/future-toc.ts",
   mode: "development",
   output: {
     path: path.resolve(__dirname, "dist"),
-    filename: "toc.js",
+    filename: "future-toc.js",
   },
   plugins: [
     new CopyPlugin({
       patterns: [
         {
-          from: "templates/html/toc.xhtml",
+          from: "templates/html/future-toc.xhtml",
           to: "./",
         },
         { from: "templates/style/", to: "./" },

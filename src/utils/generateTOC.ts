@@ -54,9 +54,9 @@ function insertChapterCount(chapterCount: number) {
 }
 
 function copyTemplates() {
-    copyFilesToFolder("templates/html/toc.xhtml", "generated-toc", "toc.xhtml")
-    copyFilesToFolder("templates/scripts/toc.ts", "generated-toc", "toc.ts")
-    copyFilesToFolder("templates/style/toc.css", "generated-toc/style", "toc.css")
+    copyFilesToFolder("templates/html/future-toc.xhtml", "generated-toc", "future-toc.xhtml")
+    copyFilesToFolder("templates/scripts/future-toc.ts", "generated-toc", "future-toc.ts")
+    copyFilesToFolder("templates/style/future-toc.css", "generated-toc/style", "future-toc.css")
 }
 
 
