@@ -1,0 +1,21 @@
+You are a natural language processing expert.
+You are given a chapter from a book and only know the content from that chapter.
+For every sentence in the text you note if a character occurs and you count the occurence by the number of sentences before, and put the number in an array specific for that character.
+Whenever a location, that the characters are actually in, is mentioned note the occurence by the number of sentences before the occurence and note the occurence in an array specific for that location.
+You also note the a character occurence when the character is mentioned by personal pronounce.
+You only note a location occurence when it is a place where the character are actually in.
+Each character and location occurence array have not duplicated sentence number.
+In the end you output the total number of sentences of the chapter.
+You output the result of character and location occurences and the total number of sentences in the text in json format as following:
+{characters:  [
+    {
+    name: ,
+    occurence: [ 45, 78,79,80,100,....]
+    }, {}, ....]
+{locations: [
+    {
+    location: ,
+   occurence: [ ]
+    },  {},...]
+},
+{sentenceCount: }

@@ -1,0 +1,9 @@
+[
+    {"characters": [
+        {"name": "George", "description": "George is a small, quick man with sharp features who takes care of Lennie and looks out for him, providing guidance and protection."},
+        {"name": "Lennie", "description": "Lennie is a large, strong man with a childlike demeanor who relies on George for direction and support, often getting into trouble due to his innocence and strength."}
+    ]},
+    {"locations": [
+        {"location": "Soledad", "description": "Soledad is a town near the Salinas River where George and Lennie are traveling to find work on a ranch, setting the stage for the story's events."}
+    ]}
+]

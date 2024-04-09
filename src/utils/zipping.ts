@@ -51,12 +51,14 @@ export function modifyOPF(
   let obj = parser.parse(xmlData);
   //   console.dir(obj, { depth: 15 });
 
+  // check for epubs from webpage Epubbook
   let manifestIdx = getItemIndex(
     obj.package.manifest.item,
     "@_href",
     ["index.xhtml"]
   );
 
+  // check for epubs from webpage Project Gutenberg and from Pocketbook
   if(!manifestIdx) {
     manifestIdx = getItemIndex(
       obj.package.manifest.item,
