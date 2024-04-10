@@ -3,6 +3,7 @@ import { parse } from "node-html-parser";
 import fs from "node:fs";
 import { XMLParser, XMLBuilder } from "fast-xml-parser";
 import { writeFileSync } from "fs";
+import { gptGetCharacters } from "./gpt-characters.js";
 
 // source - words per minute: wwww.thereadtime.com
 const Words_Per_Minute: Record<string, number> = {
@@ -17,10 +18,9 @@ function getChapterFilePaths(epubPath: string) {
   const chapterPaths = paths.filter(
     (path) =>
       !path.toLowerCase().includes("cover") ||
-    !path.toLowerCase().includes("index") ||
+      !path.toLowerCase().includes("index") ||
       !path.toLowerCase().includes("toc") ||
       !path.toLowerCase().includes("wrap")
-
   );
   return chapterPaths;
 }
@@ -30,19 +30,18 @@ function getTextFromXHTML(html: string) {
   const parsed = parse(html);
   if (parsed === null || parsed === undefined) {
     console.log("Failed to get text");
-    return ""
+    return "";
   }
 
   const firstChild = parsed?.firstChild?.innerText ?? "";
-  console.log("FIRST:", firstChild)
-  const content = parsed?.structuredText
+  console.log("FIRST:", firstChild);
+  const content = parsed?.structuredText;
   const text = content.replace(firstChild, " ");
-    // const innerText = parsed?.innerText;
+  // const innerText = parsed?.innerText;
   // console.log("innerText", innerText)
   // console.log("content", content)
   return text;
 }
-
 
 // get the time of reading a given text
 function getReadingDuration(text: string, pace: string = "average") {
@@ -72,8 +71,7 @@ function extractChapterText(epubPath: string, extractedPath: string) {
     );
     const text = getTextFromXHTML(chapterText);
 
-    chapterTexts.push({title: chapterPaths[i], text: text});
-
+    chapterTexts.push({ title: chapterPaths[i], text: text });
   }
   return chapterTexts;
 }
@@ -102,12 +100,38 @@ export function getReadingTimeChapters(
   return readingTimeChapters;
 }
 
-export function saveChaptersToFile(epubPath: string, extractedFolder: string) {
-  const chapters = extractChapterText(epubPath, extractedFolder)
-  console.log("chapters", chapters.length)
-  for(let i = 0; i < chapters.length; i++) {
-    const fileName = chapters[i]['title'].replace('OEBPS/', "").replace('.html', "").replace('.xhtml', "")
-    const dest = 'src/chapters/' + fileName + '.txt'
-    writeFileSync( dest, chapters[i].text)
+
+function saveChaptersToFile(epubPath: string, extractedFolder: string) {
+  const chapters = extractChapterText(epubPath, extractedFolder);
+  console.log("chapters", chapters.length);
+  for (let i = 0; i < chapters.length; i++) {
+    const fileName = chapters[i]["title"]
+      .replace("OEBPS/", "")
+      .replace(".html", "")
+      .replace(".xhtml", "");
+    const dest = "src/chapters/" + fileName + ".txt";
+    writeFileSync(dest, chapters[i].text);
   }
+}
+
+
+function saveCharactersToFile() {
+  const chapterTextList = fs.readdirSync("./src/chapters")
+  for(let i = 0; i < chapterTextList.length; i++) {
+    const text = fs.readFileSync("./src/chapters/" + chapterTextList[i], 'utf-8')
+    const fileName = chapterTextList[i].replace('.txt', '.ts')
+    gptGetCharacters(text)
+      .then(characters => {
+        if(characters === null) {
+          return console.log("No characters")
+        }
+        fs.writeFileSync('src/named-entities/' + fileName, characters)
+      })
+      .catch(err => console.log(err.code))
+  }
+
+}
+
+export function chapterHandler() {
+  saveCharactersToFile()
 }

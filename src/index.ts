@@ -1,7 +1,6 @@
-import { startGPT } from "./utils/gpt-characters.js";
 import { generateTOC } from "./utils/generateTOC.js";
 import { modifyOPF, compressToEpub, decompressEpub, copyFilesToFolder, insertTOCFiles } from "./utils/zipping.js";
-import { getChapterCount, getReadingTimeChapters, saveChaptersToFile } from "./utils/chapterHandling.js";
+import { chapterHandler, getChapterCount, getReadingTimeChapters } from "./utils/chapterHandling.js";
 import { writeFileSync } from "fs";
 
 
@@ -32,7 +31,6 @@ let opfFile = "content.opf"
 // const chapters = extractChapterText(epubPath, extractedFolder)
 // console.log("Try", chapters[0]['OEBPS/ch01.xhtml'])
 // writeFileSync( 'src/chapters/ch03.txt',chapters[2]['OEBPS/ch03.xhtml'])
-// saveChaptersToFile(epubPath, extractedFolder)
 
 // console.log("chapters", chapters[1])
 // getChapterCount(epubPath)
@@ -46,4 +44,4 @@ let opfFile = "content.opf"
 // compressToEpub(extractedFolder, compressFolder);
 
 
-// startGPT();
+chapterHandler()
