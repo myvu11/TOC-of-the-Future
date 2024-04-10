@@ -1,5 +1,12 @@
 import { buildInstanceChart } from "./instancechart";
 import { buildLayoutRectangle } from "./layout-rectangle";
+import * as chaptersOccurences from '../chapterInstances/steinbeck.json';
+
+
+
+const occurences = chaptersOccurences
+console.log("first", occurences[0].characters)
+console.log("count", occurences[0].sentenceCount)
 
 const inputCharacterOccurence = [
   {
@@ -28,6 +35,7 @@ const inputCharacterOccurence = [
 ];
 
 const inputChapterLength = 2106;
+
 
 const ch1 = {
   characters: [
@@ -112,5 +120,7 @@ const ch2 = {
   sentenceCount: 387,
 };
 
-buildInstanceChart("1", inputCharacterOccurence, inputChapterLength);
-// buildLayoutRectangle();
+// buildInstanceChart("1", inputCharacterOccurence, inputChapterLength);
+for(let i = 0; i < occurences.length; i++) {
+  buildInstanceChart(String(i+1), occurences[i].characters, occurences[i].sentenceCount);
+}

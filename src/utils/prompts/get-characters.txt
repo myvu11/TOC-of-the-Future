@@ -3,11 +3,11 @@ You extract all characters and locations from the chapter, and only the chapter.
 You only extract locations given in the chapter where the characters are in.
 You make a one sentence explanation why each character and locations are important.
 You output the result in the following format:
-[
-    {"characters": [
+{
+    "characters": [
         {name: string, description: string},
-        ]},
-    {"locations": [
+        ],
+    "locations": [
         {location: string, description: string},
-    ]}
-]
+    ]
+}

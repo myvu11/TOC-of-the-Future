@@ -10,9 +10,6 @@ const viewBoxDim = { x: -margin.left, y: -margin.top, width: 950, height: 250 };
 const lineWidth = 1.2;
 const lineLength = (viewBoxDim.height - margin.top) / 5;
 
-let characterOccurence: Record<string, string | number[]>[] = [];
-let chapterLength = 0;
-
 
 
 function toDataFormat(input: Record<string, string | number[]>[]) {
@@ -25,29 +22,31 @@ function toDataFormat(input: Record<string, string | number[]>[]) {
   return data;
 }
 
-export function buildInstanceChart(chapterID: string, inputCharacterOccurence: Record<string, string | number[]>[], inputChapterLength: number) {
-  // source from:
-  // https://github.com/gcgruen/d3-template-frequency/blob/master/make-frequency-code/make-frequency.js
-
-    // set the character occurence data
-  function setCharacterOccurence(input: any) {
-    characterOccurence = input;
-  }
-
-  function setChapterLength(input: number) {
-    chapterLength = input;
-  }
-
-  setCharacterOccurence(inputCharacterOccurence);
-  setChapterLength(inputChapterLength);
-
-  // sort character occurence in descending order
-  characterOccurence.sort((a, b) => {
+function getTopFive(occurences: Record<string, string | number[]>[]) {
+  occurences.sort((a, b) => {
     if (a.occurence.length < b.occurence.length) return -1;
     if (a.occurence.length > b.occurence.length) return 1;
     return 0;
   });
+  if(occurences.length > 5) {
+    return occurences.slice(1).slice(-5)
+  }
+  return occurences
+}
 
+export function buildInstanceChart(chapterID: string, occurences: Record<string, string | number[]>[], chapterLength: number) {
+  // source from:
+  // https://github.com/gcgruen/d3-template-frequency/blob/master/make-frequency-code/make-frequency.js
+
+
+  // sort character occurence in descending order
+  // characterOccurence.sort((a, b) => {
+  //   if (a.occurence.length < b.occurence.length) return -1;
+  //   if (a.occurence.length > b.occurence.length) return 1;
+  //   return 0;
+  // });
+  console.log("characterOccurence", occurences)
+  const characterOccurence = getTopFive(occurences)
   // setting x values
   const xVals = characterOccurence.map((occurence) => occurence.occurence);
   const xScale = d3.scaleLinear().range([0, viewBoxDim.width - margin.right - margin.left]).domain([0, chapterLength]);
@@ -64,14 +63,14 @@ export function buildInstanceChart(chapterID: string, inputCharacterOccurence: R
 
 
   const svgContainer = d3
-    .select("div#container")
+    .select("div#container" + chapterID)
     .append("svg")
     .attr("preserveAspectRatio", "xMidYMid meet")
     .attr("viewBox", viewBoxDim.x + " " + viewBoxDim.y + " " + viewBoxDim.width + " " + viewBoxDim.height)
     .classed("svg-content", true);
 
   const graph = svgContainer
-    .selectAll(".div#container")
+    .selectAll(".div#container" + chapterID)
     .data(data)
     .enter()
     .append("rect")
@@ -86,7 +85,7 @@ export function buildInstanceChart(chapterID: string, inputCharacterOccurence: R
     );
 
     svgContainer
-      .selectAll(".div#container")
+      .selectAll(".div#container" + chapterID)
       .data(yVals)
       .enter()
       .append("rect")

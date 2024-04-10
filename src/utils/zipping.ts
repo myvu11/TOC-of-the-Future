@@ -1,6 +1,7 @@
 import AdmZip from "adm-zip";
 import fs from "node:fs";
 import { XMLParser, XMLBuilder } from "fast-xml-parser";
+import { zip } from "zip-a-folder";
 
 // unzip epub file
 export function decompressEpub(filePath: string, distFolder: string) {
@@ -9,7 +10,10 @@ export function decompressEpub(filePath: string, distFolder: string) {
 }
 
 // make folder to an epub file
-export function compressToEpub(extractFileName:string, fileName: string) {
+export async function compressToEpub(
+  extractFileName: string,
+  fileName: string
+) {
   const folderName = "compressed";
   try {
     if (!fs.existsSync(folderName)) {
@@ -21,10 +25,14 @@ export function compressToEpub(extractFileName:string, fileName: string) {
 
   const zip = new AdmZip();
   zip.addLocalFolder("./" + extractFileName);
-  zip.writeZip("compressed/" + fileName + ".epub");
+  console.log("WHAT ERROR!!!");
+  await zip.writeZipPromise("compressed/" + fileName + ".epub");
   console.log("Compress successful");
 }
 
+export async function zipToEpub(extractFileName: string, fileName: string) {
+  await zip(extractFileName, "compressed/" + fileName + ".epub");
+}
 
 // modify opf file
 export function modifyOPF(
@@ -36,8 +44,8 @@ export function modifyOPF(
 ) {
   const xmlData = getFileContent(epubPath, "OEBPS", ".opf");
   if (!xmlData) {
-    console.log("No opf file")
-    return ;
+    console.log("No opf file");
+    return;
   }
 
   const options = {
@@ -52,21 +60,17 @@ export function modifyOPF(
   //   console.dir(obj, { depth: 15 });
 
   // check for epubs from webpage Epubbook
-  let manifestIdx = getItemIndex(
-    obj.package.manifest.item,
-    "@_href",
-    ["index.xhtml"]
-  );
+  let manifestIdx = getItemIndex(obj.package.manifest.item, "@_href", [
+    "index.xhtml",
+  ]);
 
   // check for epubs from webpage Project Gutenberg and from Pocketbook
-  if(!manifestIdx) {
-    manifestIdx = getItemIndex(
-      obj.package.manifest.item,
-      "@_id",
-      ["pg-header", "Cover.html"]
-    );
+  if (!manifestIdx) {
+    manifestIdx = getItemIndex(obj.package.manifest.item, "@_id", [
+      "pg-header",
+      "Cover.html",
+    ]);
   }
-
 
   if (manifestIdx) {
     obj.package.manifest.item.splice(manifestIdx, 0, {
@@ -76,7 +80,7 @@ export function modifyOPF(
     });
   } else {
     console.log("No manifest tag");
-    return ;
+    return;
   }
 
   obj.package.manifest.item.splice(0, 0, {
@@ -85,20 +89,19 @@ export function modifyOPF(
     "@_media-type": manifestItemJS["media-type"],
   });
 
-
-  const spineIdx = getItemIndex(
-    obj.package.spine.itemref,
-    "@_idref",
-    ["pg-header", "htmltoc", "Cover.html"]
-  );
+  const spineIdx = getItemIndex(obj.package.spine.itemref, "@_idref", [
+    "pg-header",
+    "htmltoc",
+    "Cover.html",
+  ]);
 
   if (spineIdx) {
     obj.package.spine.itemref.splice(spineIdx, 0, {
       "@_idref": spineItem.idref,
     });
   } else {
-    console.log("No spine tag")
-    return
+    console.log("No spine tag");
+    return;
   }
 
   if (manifestIdx && spineIdx) {
@@ -107,21 +110,19 @@ export function modifyOPF(
     const xmlContent = builder.build(obj);
 
     stringToFile(xmlContent, targetModifiedFIle);
-    console.log("File .opf modified")
-    return ;
+    console.log("File .opf modified");
+    return;
   }
-  console.log("File .opf not modified")
-  return ;
+  console.log("File .opf not modified");
+  return;
 }
-
 
 // get the file based on type and return content as string
 export function getFileContent(
   epubPath: string,
   folder: string,
   fileType: string,
-  name: string = "",
-
+  name: string = ""
 ) {
   const zip = new AdmZip(epubPath);
   const zipEntries = zip.getEntries();
@@ -134,32 +135,32 @@ export function getFileContent(
       zipEntry.entryName.endsWith(fileType) &&
       zipEntry.entryName.includes(name)
     ) {
-      console.log("got file: ", zipEntry.entryName)
+      console.log("got file: ", zipEntry.entryName);
       return zip.readAsText(zipEntry.entryName);
     }
   }
   return null;
 }
 
-
 // get array of file path names
 export function getFilePaths(
   epubPath: string,
   folder: string,
-  fileType: string,
-
+  fileType: string
 ) {
   const zip = new AdmZip(epubPath);
   const zipEntries = zip.getEntries();
-  const paths:string[] = []
+  const paths: string[] = [];
 
   for (let i = 0; i < zipEntries.length; i++) {
     const entryName = zipEntries[i].entryName;
 
     if (
-      folder && entryName.startsWith(folder) &&
+      folder &&
+      entryName.startsWith(folder) &&
       entryName.endsWith(fileType) &&
-      !entryName.includes("index") && !entryName.includes("cover") &&
+      !entryName.includes("index") &&
+      !entryName.includes("cover") &&
       !entryName.includes("toc")
     ) {
       // console.log("entry", entryName)
@@ -172,7 +173,7 @@ export function getFilePaths(
 // get index of item from an object
 function getItemIndex(obj: any, ref: string, target: string[]) {
   for (let i = 0; i < obj.length; i++) {
-    for(let j = 0; j < target.length; j++) {
+    for (let j = 0; j < target.length; j++) {
       if (obj[i][ref] === target[j]) {
         return i + 1;
       }
@@ -187,20 +188,39 @@ function stringToFile(content: string, path: string) {
 }
 
 // insert visual TOC files into target extracted folder
-export function copyFilesToFolder(source: string, targetFolder: string, targetName: string) {
-  if(!fs.existsSync(targetFolder + "/" + targetName)) {
-    fs.mkdirSync(targetFolder, {recursive: true});
+export function copyFilesToFolder(
+  source: string,
+  targetFolder: string,
+  targetName: string
+) {
+  if (!fs.existsSync(targetFolder + "/" + targetName)) {
+    fs.mkdirSync(targetFolder, { recursive: true });
   }
   fs.copyFileSync(source, targetFolder + "/" + targetName);
-  if(fs.existsSync(targetFolder + "/" + targetName)) {
-    console.log("File copied")
+  if (fs.existsSync(targetFolder + "/" + targetName)) {
+    console.log("File copied");
   }
 }
 
 export function insertTOCFiles(extractedFolder: string) {
-  copyFilesToFolder("dist/future-toc.xhtml", extractedFolder + "/OEBPS", "future-toc.xhtml");
-  copyFilesToFolder("dist/future-toc.css", extractedFolder + "/OEBPS", "future-toc.css");
-  copyFilesToFolder("dist/future-svg.css", extractedFolder + "/OEBPS", "future-svg.css");
-  copyFilesToFolder("dist/future-toc.js", extractedFolder + "/OEBPS", "future-toc.js");
-
+  copyFilesToFolder(
+    "dist/future-toc.xhtml",
+    extractedFolder + "/OEBPS",
+    "future-toc.xhtml"
+  );
+  copyFilesToFolder(
+    "dist/future-toc.css",
+    extractedFolder + "/OEBPS",
+    "future-toc.css"
+  );
+  copyFilesToFolder(
+    "dist/future-svg.css",
+    extractedFolder + "/OEBPS",
+    "future-svg.css"
+  );
+  copyFilesToFolder(
+    "dist/future-toc.js",
+    extractedFolder + "/OEBPS",
+    "future-toc.js"
+  );
 }

@@ -100,7 +100,6 @@ export function getReadingTimeChapters(
   return readingTimeChapters;
 }
 
-
 function saveChaptersToFile(epubPath: string, extractedFolder: string) {
   const chapters = extractChapterText(epubPath, extractedFolder);
   console.log("chapters", chapters.length);
@@ -114,24 +113,87 @@ function saveChaptersToFile(epubPath: string, extractedFolder: string) {
   }
 }
 
-
 function saveCharactersToFile() {
-  const chapterTextList = fs.readdirSync("./src/chapters")
-  for(let i = 0; i < chapterTextList.length; i++) {
-    const text = fs.readFileSync("./src/chapters/" + chapterTextList[i], 'utf-8')
-    const fileName = chapterTextList[i].replace('.txt', '.ts')
-    gptGetCharacters(text)
-      .then(characters => {
-        if(characters === null) {
-          return console.log("No characters")
-        }
-        fs.writeFileSync('src/named-entities/' + fileName, characters)
-      })
-      .catch(err => console.log(err.code))
-  }
+  const chapterTextList = fs.readdirSync("./src/chapters");
+  for (let i = 0; i < chapterTextList.length; i++) {
+    const text = fs.readFileSync(
+      "./src/chapters/" + chapterTextList[i],
+      "utf-8"
+    );
+    const fileName = chapterTextList[i].replace(".txt", ".json");
 
+    gptGetCharacters(text)
+      .then((characters) => {
+        if (characters === null) {
+          return console.log("No characters");
+        }
+        fs.writeFileSync(
+          "src/named-entities/" + chapterTextList[i],
+          characters
+        );
+      })
+      .catch((err) => console.log(err.code));
+  }
 }
 
-export function chapterHandler() {
-  saveCharactersToFile()
+function strToSentence(str: string) {
+  return str.replace(/([.?!])\s*(?=[A-Z])/g, "$1|").split("|");
+}
+
+function indexMentions(text: string[], name: string) {
+  const instances: number[] = [];
+  for (let i = 0; i < text.length; i++) {
+    if (text[i].includes(name)) {
+      instances.push(i + 1);
+    }
+  }
+  return { name: name, occurence: instances };
+}
+
+function getOccurences() {
+  const chapterList = fs.readdirSync("./src/chapters");
+  const entityList = fs.readdirSync("./src/named-entities");
+  const chaptersOccurences: Record<
+    string,
+    Record<string, string | number[]>[] | string | number
+  >[] = [];
+  for (let i = 0; i < chapterList.length; i++) {
+    const str = fs.readFileSync("./src/chapters/" + chapterList[i], "utf-8");
+    const text = strToSentence(str);
+    const nameStr = fs.readFileSync(
+      "./src/named-entities/" + entityList[i],
+      "utf-8"
+    );
+    const names = JSON.parse(nameStr);
+    const characters: Record<string, string | number[]>[] = [];
+    const locations: Record<string, string | number[]>[] = [];
+    for (let j = 0; j < names.characters.length; j++) {
+      const occurences = indexMentions(text, names.characters[j].name);
+      characters.push(occurences);
+    }
+    for (let j = 0; j < names.locations.length; j++) {
+      const occurences = indexMentions(text, names.locations[j].location);
+      locations.push(occurences);
+    }
+    const chapterOccurence = {
+      chapterTitle: chapterList[i].replace(".txt", ""),
+      sentenceCount: text.length,
+      characters: characters,
+      locations: locations
+    };
+    chaptersOccurences.push(chapterOccurence);
+  }
+  return chaptersOccurences;
+}
+
+function saveBookOccurences(target:string) {
+  const chaptersOccurences = getOccurences();
+  const occurenceJSON = JSON.stringify(chaptersOccurences);
+  fs.writeFileSync(target, occurenceJSON);
+}
+
+export function chapterHandler(epubPath:string, extractedFolder:string) {
+  // saveChaptersToFile(epubPath, extractedFolder)
+  // saveCharactersToFile()
+  // saveBookOccurences("templates/chapterInstances/steinbeck.ts");
 }
