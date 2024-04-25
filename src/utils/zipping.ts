@@ -69,6 +69,7 @@ export function modifyOPF(
     manifestIdx = getItemIndex(obj.package.manifest.item, "@_id", [
       "pg-header",
       "Cover.html",
+      "titlepage.png"     // www.standardebooks.org
     ]);
   }
 
@@ -91,8 +92,9 @@ export function modifyOPF(
 
   const spineIdx = getItemIndex(obj.package.spine.itemref, "@_idref", [
     "pg-header",
-    "htmltoc",
-    "Cover.html",
+    "htmltoc",          //
+    "Cover.html",       // PocketBook InkPad Color 3
+    "imprint.xhtml"     // www.starndardebooks.org
   ]);
 
   if (spineIdx) {

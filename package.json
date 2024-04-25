@@ -25,13 +25,13 @@
   "dependencies": {
     "@types/adm-zip": "^0.5.5",
     "@types/d3": "^7.4.3",
+    "@types/d3-scale": "^4.0.8",
     "adm-zip": "^0.5.12",
     "d3": "^7.8.5",
     "dotenv": "^16.4.5",
     "fast-xml-parser": "^4.3.4",
     "node-html-parser": "^6.1.12",
     "openai": "^4.29.1",
-    "spacy": "^0.0.4",
     "zip-a-folder": "^3.1.6"
   }
 }

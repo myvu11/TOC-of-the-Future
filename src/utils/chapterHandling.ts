@@ -61,6 +61,7 @@ function formatTime(duration: number) {
   return time.toString() + minuteUnit;
 }
 
+// get each chapter texts from html file
 function extractChapterText(epubPath: string, extractedPath: string) {
   const chapterPaths = getChapterFilePaths(epubPath);
   const chapterTexts: Record<string, string>[] = [];
@@ -100,6 +101,7 @@ export function getReadingTimeChapters(
   return readingTimeChapters;
 }
 
+// save chapters in text file
 function saveChaptersToFile(epubPath: string, extractedFolder: string) {
   const chapters = extractChapterText(epubPath, extractedFolder);
   console.log("chapters", chapters.length);
@@ -113,11 +115,12 @@ function saveChaptersToFile(epubPath: string, extractedFolder: string) {
   }
 }
 
-function saveCharactersToFile() {
+// save all characters from each chapter
+function saveCharactersToFile(folderName:string) {
   const chapterTextList = fs.readdirSync("./src/chapters");
   for (let i = 0; i < chapterTextList.length; i++) {
     const text = fs.readFileSync(
-      "./src/chapters/" + chapterTextList[i],
+      "./src/" + folderName + "chapters/" + chapterTextList[i],
       "utf-8"
     );
     const fileName = chapterTextList[i].replace(".txt", ".json");
@@ -128,7 +131,7 @@ function saveCharactersToFile() {
           return console.log("No characters");
         }
         fs.writeFileSync(
-          "src/named-entities/" + chapterTextList[i],
+          "src/" + folderName + "named-entities/" + fileName,
           characters
         );
       })
@@ -136,32 +139,35 @@ function saveCharactersToFile() {
   }
 }
 
+// identify a sentence from a string
 function strToSentence(str: string) {
   return str.replace(/([.?!])\s*(?=[A-Z])/g, "$1|").split("|");
 }
 
+// get the mentions of a name
 function indexMentions(text: string[], name: string) {
   const instances: number[] = [];
   for (let i = 0; i < text.length; i++) {
-    if (text[i].includes(name)) {
+    if (text[i].includes(name) || text[i].includes(name.toLowerCase())) {
       instances.push(i + 1);
     }
   }
   return { name: name, occurence: instances };
 }
 
-function getOccurences() {
-  const chapterList = fs.readdirSync("./src/chapters");
-  const entityList = fs.readdirSync("./src/named-entities");
+// get the occurences of characters
+function getOccurences(folderName:string) {
+  const chapterList = fs.readdirSync("./src/" + folderName + "/chapters");
+  const entityList = fs.readdirSync("./src/" + folderName + "/named-entities");
   const chaptersOccurences: Record<
     string,
     Record<string, string | number[]>[] | string | number
   >[] = [];
   for (let i = 0; i < chapterList.length; i++) {
-    const str = fs.readFileSync("./src/chapters/" + chapterList[i], "utf-8");
+    const str = fs.readFileSync("./src/" + folderName + "/chapters/" + chapterList[i], "utf-8");
     const text = strToSentence(str);
     const nameStr = fs.readFileSync(
-      "./src/named-entities/" + entityList[i],
+      "./src/" + folderName + "/named-entities/" + entityList[i],
       "utf-8"
     );
     const names = JSON.parse(nameStr);
@@ -187,7 +193,7 @@ function getOccurences() {
 }
 
 function saveBookOccurences(target:string) {
-  const chaptersOccurences = getOccurences();
+  const chaptersOccurences = getOccurences("steinbeck");
   const occurenceJSON = JSON.stringify(chaptersOccurences);
   fs.writeFileSync(target, occurenceJSON);
 }
@@ -195,5 +201,5 @@ function saveBookOccurences(target:string) {
 export function chapterHandler(epubPath:string, extractedFolder:string) {
   // saveChaptersToFile(epubPath, extractedFolder)
   // saveCharactersToFile()
-  // saveBookOccurences("templates/chapterInstances/steinbeck.ts");
+  saveBookOccurences("templates/chapterInstances/steinbeck.json");
 }

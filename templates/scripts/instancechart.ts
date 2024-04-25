@@ -1,13 +1,12 @@
 import * as d3 from "d3";
 
 // dimensions outside container
-const margin = { top: 20, right: 50, bottom: 20, left: 120 };
-const width = 555 / 2 - margin.left - margin.right;
-const height = 120 - margin.top - margin.bottom;
+const margin = { top: 20, right: 50, bottom: 20, left: 140 };
+
 
 // container dimensions
-const viewBoxDim = { x: -margin.left, y: -margin.top, width: 950, height: 250 };
-const lineWidth = 1.2;
+const viewBoxDim = { x: -margin.left, y: -margin.top, width: 1050, height: 250 };
+const lineWidth = 12.5;
 const lineLength = (viewBoxDim.height - margin.top) / 5;
 
 
@@ -38,35 +37,31 @@ export function buildInstanceChart(chapterID: string, occurences: Record<string,
   // source from:
   // https://github.com/gcgruen/d3-template-frequency/blob/master/make-frequency-code/make-frequency.js
 
-
-  // sort character occurence in descending order
-  // characterOccurence.sort((a, b) => {
-  //   if (a.occurence.length < b.occurence.length) return -1;
-  //   if (a.occurence.length > b.occurence.length) return 1;
-  //   return 0;
-  // });
-  console.log("characterOccurence", occurences)
+  // console.log("characterOccurence", occurences)
   const characterOccurence = getTopFive(occurences)
   // setting x values
   const xVals = characterOccurence.map((occurence) => occurence.occurence);
   const xScale = d3.scaleLinear().range([0, viewBoxDim.width - margin.right - margin.left]).domain([0, chapterLength]);
 
   // setting the y values
+  console.log("length", characterOccurence.length)
+  const scaleHeight = characterOccurence.length < 5 ? viewBoxDim.height / characterOccurence.length - margin.top*1.5 : viewBoxDim.height
   const yVals = characterOccurence.map((occurence) => occurence.name as string);
-  const yScale = d3.scalePoint().range([viewBoxDim.height - margin.top - margin.bottom, 0]).domain(yVals);
-
-  console.log("xVals", xVals);
-  console.log("yVals", yVals);
-
+  const yScale = d3.scalePoint().range([scaleHeight - margin.top - margin.bottom, 0]).domain(yVals);
   const data = toDataFormat(characterOccurence);
-  console.log("data", data);
+
+  // console.log("xVals", xVals);
+  // console.log("yVals", yVals);
+  // console.log("data", data);
+
+  const offsetY = characterOccurence.length < 5 ? viewBoxDim.y - (viewBoxDim.height / (characterOccurence.length + 1)) : viewBoxDim.y
 
 
   const svgContainer = d3
     .select("div#container" + chapterID)
     .append("svg")
     .attr("preserveAspectRatio", "xMidYMid meet")
-    .attr("viewBox", viewBoxDim.x + " " + viewBoxDim.y + " " + viewBoxDim.width + " " + viewBoxDim.height)
+    .attr("viewBox", viewBoxDim.x + " " + offsetY + " " + viewBoxDim.width + " " + viewBoxDim.height)
     .classed("svg-content", true);
 
   const graph = svgContainer
@@ -82,21 +77,25 @@ export function buildInstanceChart(chapterID: string, occurences: Record<string,
       yScale(d.name as string) !== undefined
         ? yScale(d.name as string)! - lineLength / 2
         : 0
-    );
+    )
+    .attr("fill", "grey")
+    .attr("opacity", 0.75)
+    .attr("stroke", "black")
+    .attr("stroke-width", 1.5);
 
     svgContainer
       .selectAll(".div#container" + chapterID)
       .data(yVals)
       .enter()
       .append("rect")
-      .attr("width", xScale(chapterLength))
+      .attr("width", xScale(chapterLength + 1))
       .attr("height", lineLength)
       .attr("x", d => xScale(0))
       .attr("y", d => yScale(d as string) !== undefined
       ? yScale(d as string)! - lineLength / 2
       : 0)
       .attr("fill", "grey")
-      .attr("opacity", 0.30)
+      .attr("opacity", 0.35)      //in browser: 0.3, on screenshot: 0.4
 
   const yAxis = d3.axisLeft(yScale).ticks(9)
 
