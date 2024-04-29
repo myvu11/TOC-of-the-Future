@@ -6,22 +6,24 @@ import { writeFileSync } from "fs";
 
 
 // const epubPath = "./epub-files/okakura-book-of-tea.epub";
-// const extractedFolder = "extracted/okakura";
+
 // const epubPath = "./epub-files/Alice's Adventure in Wonderland by Lewis Carroll - Project Gutenberg.epub";
 // const epubPath = "./epub-files/Oliver Twist by Charles Dickens - Project Gutenberg.epub";
 // const epubPath = "./epub-files/Austen, Jane - Pride and Prejudice.epub";
-const epubPath = "./epub-files/jane-austen_pride-and-prejudice - standardebooks.epub"
-// const epubPath = "./epub-files/steinbeck-of-mice-and-men - Epubbooks.epub";
+// const epubPath = "./epub-files/jane-austen_pride-and-prejudice - standardebooks.epub"
+const epubPath = "./epub-files/steinbeck-of-mice-and-men - Epubbooks.epub";
 // const epubPath = "./epub-files/lewis-prince-caspian - Epubbooks.epub";
 
+// const extractedFolder = "extracted/okakura";
 // const extractedFolder ='extracted/austen - pocketbook'
 // const extractedFolder ='extracted/carroll - gutenberg'
 // const extractedFolder ='extracted/lewis - epubbooks'
-const extractedFolder = "./extracted/austen - standardebooks";
+// const extractedFolder = "./extracted/austen - standardebooks";
+const extractedFolder = "./extracted/steinbeck - epubbooks";
 
 // const compressFolder = "austen"
 // const compressFolder = "carroll"
-const compressFolder = "steinbeck2"
+const compressFolder = "steinbeck4"
 const manifestItem = {id: "future-toc", href: "future-toc.xhtml", 'media-type': "application/xhtml+xml"}
 const manifestItemJS = {id: "future-toc-script", href: "future-toc.js", 'media-type': "text/javascript"}
 const spineItem = {idref:"future-toc"}
@@ -36,10 +38,10 @@ let opfFile = "package.opf"
 
 // generateTOC(epubPath)
 
-// insertTOCFiles(extractedFolder);
-// modifyOPF(epubPath, manifestItem, manifestItemJS, spineItem, extractedFolder + "/OEBPS/" + opfFile);
-// zipToEpub(extractedFolder, compressFolder);
-// compressToEpub(extractedFolder, compressFolder);
+insertTOCFiles(extractedFolder);
+modifyOPF(epubPath, manifestItem, manifestItemJS, spineItem, extractedFolder + "/OEBPS/" + opfFile);
+zipToEpub(extractedFolder, compressFolder);
 
 
-chapterHandler(epubPath, extractedFolder);
+
+// chapterHandler(epubPath, extractedFolder);

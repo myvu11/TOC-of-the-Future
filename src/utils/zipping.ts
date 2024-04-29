@@ -131,7 +131,6 @@ export function getFileContent(
 
   for (let i = 0; i < zipEntries.length; i++) {
     const zipEntry = zipEntries[i];
-
     if (
       zipEntry.entryName.startsWith(folder) &&
       zipEntry.entryName.endsWith(fileType) &&

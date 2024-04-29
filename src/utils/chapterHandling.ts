@@ -17,10 +17,11 @@ function getChapterFilePaths(epubPath: string) {
   const paths = getFilePaths(epubPath, "OEBPS", "html");
   const chapterPaths = paths.filter(
     (path) =>
-      !path.toLowerCase().includes("cover") ||
-      !path.toLowerCase().includes("index") ||
-      !path.toLowerCase().includes("toc") ||
-      !path.toLowerCase().includes("wrap")
+      !path.toLowerCase().includes("cover") ||    // for epub on EpubBooks / PocketBook
+      !path.toLowerCase().includes("index") ||    // for epub on EpubBooks
+      !path.toLowerCase().includes("toc") ||      // for epub on Gutenberg / StandardEbooks
+      !path.toLowerCase().includes("wrap") ||     // for epub on Gutenberg
+      !path.toLowerCase().includes("h-0.htm")     // for epub on Gutenberg
   );
   return chapterPaths;
 }
@@ -102,7 +103,7 @@ export function getReadingTimeChapters(
 }
 
 // save chapters in text file
-function saveChaptersToFile(epubPath: string, extractedFolder: string) {
+function saveChaptersToFile(epubPath: string, extractedFolder: string, folderName:string) {
   const chapters = extractChapterText(epubPath, extractedFolder);
   console.log("chapters", chapters.length);
   for (let i = 0; i < chapters.length; i++) {
@@ -110,14 +111,14 @@ function saveChaptersToFile(epubPath: string, extractedFolder: string) {
       .replace("OEBPS/", "")
       .replace(".html", "")
       .replace(".xhtml", "");
-    const dest = "src/chapters/" + fileName + ".txt";
+    const dest = "src/" + folderName + fileName + ".txt";
     writeFileSync(dest, chapters[i].text);
   }
 }
 
 // save all characters from each chapter
 function saveCharactersToFile(folderName:string) {
-  const chapterTextList = fs.readdirSync("./src/chapters");
+  const chapterTextList = fs.readdirSync("./src/" + folderName + "chapters");
   for (let i = 0; i < chapterTextList.length; i++) {
     const text = fs.readFileSync(
       "./src/" + folderName + "chapters/" + chapterTextList[i],
@@ -182,7 +183,7 @@ function getOccurences(folderName:string) {
       locations.push(occurences);
     }
     const chapterOccurence = {
-      chapterTitle: chapterList[i].replace(".txt", ""),
+      chapterTitle: "Chapter " + (i+1),
       sentenceCount: text.length,
       characters: characters,
       locations: locations
@@ -198,8 +199,16 @@ function saveBookOccurences(target:string) {
   fs.writeFileSync(target, occurenceJSON);
 }
 
+function saveChapterPaths(epubPath:string, target:string) {
+  const paths = getChapterFilePaths(epubPath).map(e => e.replace("OEBPS/", ""));
+  const pathsJSON = JSON.stringify(paths);
+  fs.writeFileSync(target, pathsJSON)
+}
+
 export function chapterHandler(epubPath:string, extractedFolder:string) {
-  // saveChaptersToFile(epubPath, extractedFolder)
-  // saveCharactersToFile()
+  // saveChaptersToFile(epubPath, extractedFolder, "steinbeck/chapters/")
+  // saveCharactersToFile("steinbeck/")
+  // console.log(getChapterFilePaths(epubPath));
+  // saveChapterPaths(epubPath, "templates/chapterInstances/chapterPaths.json")
   saveBookOccurences("templates/chapterInstances/steinbeck.json");
 }
