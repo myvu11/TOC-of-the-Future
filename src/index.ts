@@ -42,6 +42,4 @@ insertTOCFiles(extractedFolder);
 modifyOPF(epubPath, manifestItem, manifestItemJS, spineItem, extractedFolder + "/OEBPS/" + opfFile);
 zipToEpub(extractedFolder, compressFolder);
 
-
-
-// chapterHandler(epubPath, extractedFolder);
+// chapterHandler(epubPath, extractedFolder)

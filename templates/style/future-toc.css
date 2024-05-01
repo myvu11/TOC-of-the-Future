@@ -30,7 +30,7 @@ h2 {
 #characters {
   display: flex;
   flex-wrap: wrap;
-  gap: 27px;
+  gap: 30px;
   justify-content: space-evenly;
   margin-top: 0.5rem;
   margin-left: 1rem;

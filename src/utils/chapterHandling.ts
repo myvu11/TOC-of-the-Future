@@ -156,13 +156,30 @@ function indexMentions(text: string[], name: string) {
   return { name: name, occurence: instances };
 }
 
+// get the mentions of a name
+function indexNoMentions(text: string[], characters: Record<string, string>[]) {
+  const instances: number[] = [];
+  for (let i = 0; i < text.length; i++) {
+    const mentions = characters.map(character =>
+      // console.log("name", character.name)
+      !(text[i].includes(character.name)) && !(text[i].includes(character.name.toLowerCase()))
+    )
+
+    if(mentions.every(v => v === true)) {
+      instances.push(i + 1);
+    }
+
+  }
+  return instances;
+}
+
 // get the occurences of characters
 function getOccurences(folderName:string) {
   const chapterList = fs.readdirSync("./src/" + folderName + "/chapters");
   const entityList = fs.readdirSync("./src/" + folderName + "/named-entities");
   const chaptersOccurences: Record<
     string,
-    Record<string, string | number[]>[] | string | number
+    Record<string, string | number[]>[] | string | number | number[]
   >[] = [];
   for (let i = 0; i < chapterList.length; i++) {
     const str = fs.readFileSync("./src/" + folderName + "/chapters/" + chapterList[i], "utf-8");
@@ -182,11 +199,15 @@ function getOccurences(folderName:string) {
       const occurences = indexMentions(text, names.locations[j].location);
       locations.push(occurences);
     }
+
+    const noMentions = indexNoMentions(text, names.characters)
+
     const chapterOccurence = {
       chapterTitle: "Chapter " + (i+1),
       sentenceCount: text.length,
       characters: characters,
-      locations: locations
+      locations: locations,
+      description: noMentions
     };
     chaptersOccurences.push(chapterOccurence);
   }
@@ -210,5 +231,6 @@ export function chapterHandler(epubPath:string, extractedFolder:string) {
   // saveCharactersToFile("steinbeck/")
   // console.log(getChapterFilePaths(epubPath));
   // saveChapterPaths(epubPath, "templates/chapterInstances/chapterPaths.json")
+
   saveBookOccurences("templates/chapterInstances/steinbeck.json");
 }
