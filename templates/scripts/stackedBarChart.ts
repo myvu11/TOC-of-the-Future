@@ -1,8 +1,8 @@
 import * as d3 from "d3";
 
-// Specify the chart’s dimensions (except for the height).
+// Specify the chart’s dimensions
 
-const marginTop = 55;
+const marginTop = 35;
 const marginRight = 20;
 const marginBottom = 10;
 const marginLeft = 85;
@@ -236,7 +236,7 @@ export function buildStackedBarChart(
   // .append("title")
   // .text((d) => `${d.data.chapterTitle}`);
 
-  const lineWidth = 0.25;     //12.5 for instance chart
+  const lineWidth = 0.25;
   // Append instance chart
   svg.append("g")
     .selectAll("g")
@@ -263,7 +263,7 @@ export function buildStackedBarChart(
       d3.select(el.parentNode)
         .insert("svg:a")
         .style("cursor", "pointer")
-        .attr("xlink:href", paths[i])
+        .attr("xlink:href", "chapter-instance.xhtml")      // paths[i]
         .on("click", (d) => d.fill("blue"))
         .append(() => el);
     })
@@ -295,12 +295,6 @@ export function buildStackedBarChart(
     .call((g) => g.selectAll(".domain").remove());
   // .style("font", "0px times")
 
-  // append x axis to mark chart top restriction
-  // svg
-  //   .append("g")
-  //   .attr("transform", `translate(${0},${0})`)
-  //   .call(d3.axisTop(x).tickSize(0))
-  //   .style("font", "0px times")
 
   const axisLabelX = width / 2 - marginLeft / 2;
   const axisLabelY = height + marginBottom * 4;
@@ -314,7 +308,7 @@ export function buildStackedBarChart(
     .text("Sentences")
     .style("font", "16px times");
 
-  
+
 
   // // Append categorical legend
   // const size = 20;

@@ -1,0 +1,6 @@
+Given a chapter of a book divide the chapter into sections and give a fitting title for each section.
+The result is outputtet in following format:
+[
+{sectionID: number,
+sectionTitle: string
+}]

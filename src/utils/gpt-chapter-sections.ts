@@ -8,13 +8,13 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-export async function gptGetCharacters(text: string) {
+export async function gptGetChapterSections(text: string) {
   const response = await openai.chat.completions.create({
     model: "gpt-3.5-turbo-0125",
     messages: [
       {
         role: "system",
-        content: fs.readFileSync("./src/utils/prompts/get-characters.txt", "utf-8"),
+        content: fs.readFileSync("./src/utils/prompts/get-chapter-sections.txt", "utf-8"),
       },
       {
         role: "user",

@@ -23,6 +23,7 @@ module.exports = {
           to: "./",
         },
         { from: "templates/style/", to: "./" },
+        { from: "templates/html/"}
       ],
     }),
   ],

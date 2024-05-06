@@ -1,0 +1,114 @@
+[
+  {
+    "chapter": 1,
+    "sections": [
+      { "sectionID": 1, "sectionTitle": "Setting the Scene" },
+      { "sectionID": 2, "sectionTitle": "Introduction of Characters" },
+      { "sectionID": 3, "sectionTitle": "George and Lennie's Relationship" },
+      { "sectionID": 4, "sectionTitle": "Dreams and Aspirations" },
+      { "sectionID": 5, "sectionTitle": "Conflict and Tension" },
+      { "sectionID": 6, "sectionTitle": "Closure and Setting for the Night" }
+    ]
+  },
+  {
+    "chapter": 2,
+    "sections": [
+      { "sectionID": 1, "sectionTitle": "Description of the Bunk House" },
+      {
+        "sectionID": 2,
+        "sectionTitle": "Introduction of Characters: The Old Swamper, George, and Lennie"
+      },
+      {
+        "sectionID": 3,
+        "sectionTitle": "Discussion about Previous Occupant of the Bed"
+      },
+      {
+        "sectionID": 4,
+        "sectionTitle": "Introduction of the Boss and Interaction with George and Lennie"
+      },
+      {
+        "sectionID": 5,
+        "sectionTitle": "Conversation about the Stable Buck and Curley's Behavior"
+      },
+      {
+        "sectionID": 6,
+        "sectionTitle": "Discussion about Curley's Wife and Curley's Aggressive Behavior"
+      },
+      {
+        "sectionID": 7,
+        "sectionTitle": "George's Concerns about Curley and Lennie's Instructions"
+      },
+      {
+        "sectionID": 8,
+        "sectionTitle": "Introduction of Slim and Carlson's Conversation about Dogs"
+      },
+      {
+        "sectionID": 9,
+        "sectionTitle": "Curley's Search for His Wife and George's Interaction with Him"
+      },
+      {
+        "sectionID": 10,
+        "sectionTitle": "Final Scene in the Bunk House with the Ancient Dog"
+      }
+    ]
+  },
+  {
+    "chapter": 3,
+    "sections": [
+      { "sectionID": 1, "sectionTitle": "Introduction to the Bunkhouse" },
+      { "sectionID": 2, "sectionTitle": "Discussion between Slim and George" },
+      { "sectionID": 3, "sectionTitle": "Recounting Stories and Confessions" },
+      {
+        "sectionID": 4,
+        "sectionTitle": "Conflict with Curley and Lennie's Reaction"
+      },
+      { "sectionID": 5, "sectionTitle": "Resolution and Future Plans" }
+    ]
+  },
+  {
+    "chapter": 4,
+    "sections": [
+      {
+        "sectionID": 1,
+        "sectionTitle": "Introduction to Crooks' Living Quarters"
+      },
+      { "sectionID": 2, "sectionTitle": "Encounter with Lennie" },
+      {
+        "sectionID": 3,
+        "sectionTitle": "Discussion about Dreams and Loneliness"
+      },
+      {
+        "sectionID": 4,
+        "sectionTitle": "Curley's Wife's Intrusion and Conflict"
+      },
+      { "sectionID": 5, "sectionTitle": "Resolution with George and Candy" }
+    ]
+  },
+  {
+    "chapter": 5,
+    "sections": [
+      { "sectionID": 1, "sectionTitle": "Setting the Scene" },
+      { "sectionID": 2, "sectionTitle": "Lennie's Tragedy with the Puppy" },
+      { "sectionID": 3, "sectionTitle": "Encounter with Curley's Wife" },
+      { "sectionID": 4, "sectionTitle": "Tragic Turn of Events" },
+      { "sectionID": 5, "sectionTitle": "Discovery and Decision Making" }
+    ]
+  },
+  {
+    "chapter": 6,
+    "sections": [
+      {
+        "sectionID": 1,
+        "sectionTitle": "The Quiet Waters of the Salinas River"
+      },
+      { "sectionID": 2, "sectionTitle": "Lennie's Inner Turmoil" },
+      {
+        "sectionID": 3,
+        "sectionTitle": "Visions of Aunt Clara and a Giant Rabbit"
+      },
+      { "sectionID": 4, "sectionTitle": "George's Tension and Decision" },
+      { "sectionID": 5, "sectionTitle": "The Tragic Conclusion" },
+      { "sectionID": 6, "sectionTitle": "Reactions and Aftermath" }
+    ]
+  }
+]

@@ -12,6 +12,7 @@ You output the result of character and location occurences and the total number 
     name: ,
     occurence: [ 45, 78,79,80,100,....]
     }, {}, ....]
+},
 {locations: [
     {
     location: ,

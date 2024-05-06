@@ -4,6 +4,8 @@ import fs from "node:fs";
 import { XMLParser, XMLBuilder } from "fast-xml-parser";
 import { writeFileSync } from "fs";
 import { gptGetCharacters } from "./gpt-characters.js";
+import { strToSentence } from "./textUtils.js";
+
 
 // source - words per minute: wwww.thereadtime.com
 const Words_Per_Minute: Record<string, number> = {
@@ -35,7 +37,7 @@ function getTextFromXHTML(html: string) {
   }
 
   const firstChild = parsed?.firstChild?.innerText ?? "";
-  console.log("FIRST:", firstChild);
+  // console.log("FIRST:", firstChild);
   const content = parsed?.structuredText;
   const text = content.replace(firstChild, " ");
   // const innerText = parsed?.innerText;
@@ -140,10 +142,6 @@ function saveCharactersToFile(folderName:string) {
   }
 }
 
-// identify a sentence from a string
-function strToSentence(str: string) {
-  return str.replace(/([.?!])\s*(?=[A-Z])/g, "$1|").split("|");
-}
 
 // get the mentions of a name
 function indexMentions(text: string[], name: string) {
@@ -156,7 +154,7 @@ function indexMentions(text: string[], name: string) {
   return { name: name, occurence: instances };
 }
 
-// get the mentions of a name
+// get the mentions of no names
 function indexNoMentions(text: string[], characters: Record<string, string>[]) {
   const instances: number[] = [];
   for (let i = 0; i < text.length; i++) {
@@ -214,23 +212,26 @@ function getOccurences(folderName:string) {
   return chaptersOccurences;
 }
 
+// save occurences in each chapter to file
 function saveBookOccurences(target:string) {
   const chaptersOccurences = getOccurences("steinbeck");
   const occurenceJSON = JSON.stringify(chaptersOccurences);
   fs.writeFileSync(target, occurenceJSON);
 }
 
+// save the chapters paths to file
 function saveChapterPaths(epubPath:string, target:string) {
   const paths = getChapterFilePaths(epubPath).map(e => e.replace("OEBPS/", ""));
   const pathsJSON = JSON.stringify(paths);
   fs.writeFileSync(target, pathsJSON)
 }
 
+
+
 export function chapterHandler(epubPath:string, extractedFolder:string) {
   // saveChaptersToFile(epubPath, extractedFolder, "steinbeck/chapters/")
   // saveCharactersToFile("steinbeck/")
   // console.log(getChapterFilePaths(epubPath));
   // saveChapterPaths(epubPath, "templates/chapterInstances/chapterPaths.json")
-
-  saveBookOccurences("templates/chapterInstances/steinbeck.json");
+  // saveBookOccurences("templates/chapterInstances/steinbeck.json");
 }

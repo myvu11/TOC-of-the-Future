@@ -37,11 +37,12 @@ export async function zipToEpub(extractFileName: string, fileName: string) {
 // modify opf file
 export function modifyOPF(
   epubPath: string,
-  manifestItem: { id: string; href: string; "media-type": string },
-  manifestItemJS: { id: string; href: string; "media-type": string },
+  manifestItems: { id: string; href: string; "media-type": string }[],
   spineItem: { idref: string },
-  targetModifiedFIle: string
+  spineItemsExtra: { idref: string }[],
+  opfFile: string,
 ) {
+
   const xmlData = getFileContent(epubPath, "OEBPS", ".opf");
   if (!xmlData) {
     console.log("No opf file");
@@ -57,40 +58,16 @@ export function modifyOPF(
   const parser = new XMLParser(options);
 
   let obj = parser.parse(xmlData);
-  //   console.dir(obj, { depth: 15 });
 
-  // check for epubs from webpage Epubbook
-  let manifestIdx = getItemIndex(obj.package.manifest.item, "@_href", [
-    "index.xhtml",
-  ]);
-
-  // check for epubs from webpage Project Gutenberg and from Pocketbook
-  if (!manifestIdx) {
-    manifestIdx = getItemIndex(obj.package.manifest.item, "@_id", [
-      "pg-header",
-      "Cover.html",
-      "titlepage.png"     // www.standardebooks.org
-    ]);
-  }
-
-  if (manifestIdx) {
-    obj.package.manifest.item.splice(manifestIdx, 0, {
-      "@_id": manifestItem.id,
-      "@_href": manifestItem.href,
-      "@_media-type": manifestItem["media-type"],
+  for(let i = 0; i < manifestItems.length; i++) {
+    obj.package.manifest.item.splice(0, 0, {
+    "@_id": manifestItems[i].id,
+    "@_href": manifestItems[i].href,
+    "@_media-type": manifestItems[i]["media-type"],
     });
-  } else {
-    console.log("No manifest tag");
-    return;
   }
 
-  obj.package.manifest.item.splice(0, 0, {
-    "@_id": manifestItemJS.id,
-    "@_href": manifestItemJS.href,
-    "@_media-type": manifestItemJS["media-type"],
-  });
-
-  const spineIdx = getItemIndex(obj.package.spine.itemref, "@_idref", [
+    const spineIdx = getItemIndex(obj.package.spine.itemref, "@_idref", [
     "pg-header",
     "htmltoc",          //
     "Cover.html",       // PocketBook InkPad Color 3
@@ -106,12 +83,31 @@ export function modifyOPF(
     return;
   }
 
-  if (manifestIdx && spineIdx) {
+  // get index of last spine item
+  const itemrefLength = obj.package.spine.itemref.length
+  const endidref = obj.package.spine.itemref[itemrefLength - 1]
+  console.log("end", endidref)
+  const endSpineIdx = getItemIndex(obj.package.spine.itemref, "@_idref", [`${endidref['@_idref']}`])
+  console.log("idx", endSpineIdx)
+  
+  if (endSpineIdx) {
+    for(let i = 0; i < spineItemsExtra.length; i ++) {
+      obj.package.spine.itemref.splice(endSpineIdx, 0, {
+        "@_idref": spineItemsExtra[i].idref,
+      });
+    }
+  } else {
+    console.log("No spine tag");
+    return;
+  }
+
+  // if (manifestIdx && spineIdx) {
+  if (spineIdx) {
     // parse object into XML
     const builder = new XMLBuilder(options);
     const xmlContent = builder.build(obj);
 
-    stringToFile(xmlContent, targetModifiedFIle);
+    stringToFile(xmlContent, opfFile);
     console.log("File .opf modified");
     return;
   }
@@ -204,24 +200,33 @@ export function copyFilesToFolder(
 }
 
 export function insertTOCFiles(extractedFolder: string) {
-  copyFilesToFolder(
-    "dist/future-toc.xhtml",
-    extractedFolder + "/OEBPS",
-    "future-toc.xhtml"
-  );
-  copyFilesToFolder(
-    "dist/future-toc.css",
-    extractedFolder + "/OEBPS",
-    "future-toc.css"
-  );
-  copyFilesToFolder(
-    "dist/future-svg.css",
-    extractedFolder + "/OEBPS",
-    "future-svg.css"
-  );
-  copyFilesToFolder(
-    "dist/future-toc.js",
-    extractedFolder + "/OEBPS",
-    "future-toc.js"
-  );
+  // copyFilesToFolder(
+  //   "dist/future-toc.xhtml",
+  //   extractedFolder + "/OEBPS",
+  //   "future-toc.xhtml"
+  // );
+  // copyFilesToFolder(
+  //   "dist/future-toc.css",
+  //   extractedFolder + "/OEBPS",
+  //   "future-toc.css"
+  // );
+  // copyFilesToFolder(
+  //   "dist/future-svg.css",
+  //   extractedFolder + "/OEBPS",
+  //   "future-svg.css"
+  // );
+  // copyFilesToFolder(
+  //   "dist/future-toc.js",
+  //   extractedFolder + "/OEBPS",
+  //   "future-toc.js"
+  // );
+  fs.cp('./dist', extractedFolder +'/OEBPS', { recursive: true }, (err) => {
+    if (err) {
+      console.error(err);
+    } else {
+      console.log("Files copied")
+    }
+  });
 }
+
+
