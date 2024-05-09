@@ -299,7 +299,7 @@ export function buildStackedBarChart(
   const axisLabelX = width / 2 - marginLeft / 2;
   const axisLabelY = height + marginBottom * 4;
 
-  // append x text at top chart
+  // append x text at bottom chart
   svg
     .append("text")
     .attr("class", "x label")

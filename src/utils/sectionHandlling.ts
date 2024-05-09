@@ -91,13 +91,6 @@ function saveChapterSectionTitles(folderName:string) {
           ["sectionID"]: `${sections[j].sectionID}`, sectionTitle: sections[j].sectionTitle
         })
         const noMentions = indexNoMentions(sections[j].text, characters)
-        noMentions.forEach( occur => {
-          sectionOccurence.push({
-            sectionID: sections[j].sectionID,
-            name: "no mentionings",
-            index: occur
-          })
-        })
         for(let k = 0; k < characters.length; k++) {
           const mentions = indexMentions(sections[j].text, characters[k].name)
           mentions.occurence.forEach( occur => {
@@ -108,6 +101,13 @@ function saveChapterSectionTitles(folderName:string) {
             })
           })
         }
+        noMentions.forEach( occur => {
+          sectionOccurence.push({
+            sectionID: sections[j].sectionID,
+            name: "no mentionings",
+            index: occur
+          })
+        })
       }
       occurenceSet.push({
         sectionTitles,
