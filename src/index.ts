@@ -54,20 +54,22 @@ const manifestItems = [
   },
 ];
 
+const spineItem = {idref: "future-toc"}
+
 // <itemref idref="future-toc-chapter-instance" linear="no"/>
-const spineItemsExtra = [{}];
+const spineItemsExtra: { idref: string; linear: string}[] = [];
 let opfFile = "package.opf";
 
 // decompressEpub(epubPath, extractedFolder);
 const chapterCount = getChapterCount(epubPath);
 for (let i = 0; i < chapterCount; i++) {
   spineItemsExtra.push({
-    idref: `future-toc-chapter${i + 1}-details`,
+    idref: `future-toc-chapter-${i + 1}`,
     linear: "no",
   });
   manifestItems.push({
-    id: `future-toc-chapter${i + 1}-details`,
-    href: "layoutRectangle.xhtml",
+    id: `future-toc-chapter-${i + 1}`,
+    href: `future-toc-chapter-${i + 1}.xhtml`,
     "media-type": "application/xhtml+xml",
   });
 }
@@ -79,7 +81,7 @@ for (let i = 0; i < chapterCount; i++) {
 
 // insertTOCFiles(extractedFolder);
 // modifyOPF(epubPath, manifestItem, manifestItemJS, spineItem, extractedFolder + "/OEBPS/" + opfFile, manifestItemExtra);
-// modifyOPF(epubPath, manifestItems, spineItem, spineItemsExtra, extractedFolder + "/OEBPS/" + opfFile);
+modifyOPF(epubPath, manifestItems, spineItem, spineItemsExtra, extractedFolder + "/OEBPS/" + opfFile);
 // zipToEpub(extractedFolder, compressFolder);
 
 // chapterHandler(epubPath, extractedFolder)

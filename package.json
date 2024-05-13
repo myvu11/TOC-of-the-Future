@@ -32,6 +32,7 @@
     "fast-xml-parser": "^4.3.4",
     "node-html-parser": "^6.1.12",
     "openai": "^4.29.1",
+    "spacy": "^0.0.4",
     "zip-a-folder": "^3.1.6"
   }
 }

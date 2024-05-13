@@ -140,7 +140,7 @@ export function buildStackedBarChart(
   paths: string[]
 ) {
   // Determine the series that need to be stacked.
-  console.log("data", data);
+  // console.log("data", data);
 
   const groups = getChapterTitles(data);
   let topCharacters = getTops(data, numberOfMains);
@@ -150,8 +150,8 @@ export function buildStackedBarChart(
 
   // console.log("groups", groups);
   // console.log("stackKeys", stackKeys);
-  console.log("chartdata", chartData);
-  console.log("instancedata", instanceData);
+  // console.log("chartdata", chartData);
+  // console.log("instancedata", instanceData);
 
   const stackedData = d3.stack().keys(stackKeys)(chartData);
 
@@ -161,8 +161,8 @@ export function buildStackedBarChart(
     })
   );
 
-  console.log("max", maxEntities);
-  console.log("stackedData", stackedData);
+  // console.log("max", maxEntities);
+  // console.log("stackedData", stackedData);
 
   // Compute the height from the number of stacks.
   const height = stackedData[0].length * (barHeight + barGap);
@@ -195,14 +195,15 @@ export function buildStackedBarChart(
   ].reverse().splice(0, numberOfMains+1);
   // d3.schemeAccent
   const color = d3
-    .scaleOrdinal<string>([...divergingScheme, "#045a8d"])
+    .scaleOrdinal<string>([...divergingScheme, "grey"]) //#045a8d
     .domain(stackKeys)
     // .unknown("#ccc");
 
   const charactersDiv = document.getElementById("characters");
   stackKeys.forEach((key) => {
     const div = document.createElement("div");
-    div.innerHTML = `<div class='character'>${key}</div><div class='color' style='background: ${color(
+    div.classList.add("legend");
+    div.innerHTML = `<div>${key}</div><div class='color' style='background: ${color(
       key
     )}'></div>`;
     charactersDiv?.append(div);
@@ -263,7 +264,7 @@ export function buildStackedBarChart(
       d3.select(el.parentNode)
         .insert("svg:a")
         .style("cursor", "pointer")
-        .attr("xlink:href", "chapter-instance.xhtml")      // paths[i]
+        .attr("xlink:href", `future-toc-chapter-${i+1}.xhtml`)      // paths[i]
         .on("click", (d) => d.fill("blue"))
         .append(() => el);
     })

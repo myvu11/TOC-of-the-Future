@@ -1,6 +1,5 @@
 import * as d3 from "d3";
 
-
 const marginTop = 15;
 const marginRight = 20;
 const marginBottom = 10;
@@ -11,41 +10,93 @@ const barGap = 10;
 const OTHERS = "secondary";
 const DESCRIPTIONS = "no mentionings";
 
-interface ChapterSections {
-  chapter: string;
-    sectionOccurence: {
-        sectionID: number;
-        name: string;
-        index: number;
-    }[];
-}
+type ChapterSections = {
+  sectionTitles: { sectionID: string; sectionTitle: string }[];
+  sectionOccurence: {
+    sectionID: number;
+    name: string;
+    index: number;
+  }[];
+};
 
-function countMentionings(data:Record<string, Record<string, string | number>[]>) {
-  const counts = []
-  for(let i = 0; i < data.sectionTitles.length; i++) {
-    const count = data.sectionOccurence.filter(obj => obj.sectionID === (i+1)).length
-    counts.push(count)
+// get the counts of each chapter section
+function countMentionings(data: ChapterSections) {
+  const counts = [];
+  for (let i = 0; i < data.sectionTitles.length; i++) {
+    const count = data.sectionOccurence.filter(
+      (obj) => obj.sectionID === i + 1
+    ).length;
+    counts.push(count);
   }
   return counts;
 }
 
-export function buildChapterInstance(data:Record<string, Record<string, string | number>[]>, ID: number) {
-  const mains:string[] = ["George", "Lennie"]
+// get max section length
+function getMaxSectionLength(
+  sectionOccurence: Record<string, string | number>[]
+) {
+  const max = sectionOccurence.reduce((acc, obj) => {
+    acc = Number(obj.index) > acc ? Number(obj.index) : acc;
+    return acc;
+  }, 0);
+  return max;
+}
+
+// get the sentences with multiple characters
+function detectCommonInstances(data: ChapterSections) {
+  const commonData: (ChapterSections["sectionOccurence"][number] & {
+    numberInGroup: number;
+    groupIndex: number;
+  })[] = [];
+
+  for (let i = 0; i < data.sectionTitles.length; i++) {
+    const sectionData = data.sectionOccurence.filter(
+      (e) => e.sectionID === i + 1
+    );
+
+    const groups = Object.groupBy(sectionData, (data) => data.index);
+
+    const instances = Object.values(groups).flatMap(
+      (group) =>
+        group?.map((instance, index) => ({
+          ...instance,
+          numberInGroup: group.length,
+          groupIndex: index,
+        })) ?? []
+    );
+
+    commonData.push(...instances);
+  }
+  return commonData;
+}
+
+
+
+// build the chapterInstance
+export function buildChapterInstance(data: ChapterSections, ID: number) {
+  const mains: string[] = ["George", "Lennie"];
   const keys = [...mains, OTHERS, DESCRIPTIONS];
-  console.log("data", data)
   const counts = countMentionings(data);
-
   const maxEntities = Math.max(...counts);
-  const sections: string[] = data.sectionTitles.map(title => title.sectionID.toString());
-  const occurence: Record<string, string | number>[] = data.sectionOccurence;
+  const sections: string[] = data.sectionTitles.map((title) =>
+    "Section " + title.sectionID.toString()
+  );
 
-  console.log("counts", counts)
-  console.log("maxEntities", maxEntities)
-  console.log("occurence", occurence)
-  console.log("sections", sections);
+  const occurence: Record<string, string | number>[] = data.sectionOccurence;
+  const commonData = detectCommonInstances(data);
+  const maxLength = getMaxSectionLength(occurence);
+
+  // console.log("max", maxLength)
+  console.log("data", data);
+  console.log("commonData: ", commonData);
+  // console.log("counts", counts);
+  // console.log("maxEntities", maxEntities);
+  // console.log("occurence", occurence);
+  // console.log("sections", sections);
 
   const height = data.sectionTitles.length * (barHeight + barGap);
-  const width = document.getElementById(`chapter-instance-${ID}`)?.clientWidth ?? 0;
+  const width =
+    document.getElementById(`future-toc-chapter-${ID}`)?.clientWidth ?? 0;
   const viewBoxDim = {
     x: -marginLeft,
     y: -marginTop,
@@ -53,12 +104,14 @@ export function buildChapterInstance(data:Record<string, Record<string, string |
     height: height,
   };
 
-  const x = d3
+  const lineWidth = Math.floor(width/maxLength);
+
+  const xScale = d3
     .scaleLinear()
-    .domain([0, maxEntities])
+    .domain([0, maxLength])
     .range([0, width - marginLeft]);
 
-  const y = d3
+  const yScale = d3
     .scaleBand<string>()
     .domain(sections)
     .range([0, height])
@@ -67,73 +120,84 @@ export function buildChapterInstance(data:Record<string, Record<string, string |
   const divergingScheme = [
     "#fdd49e",
     "#fdbb84",
-    "#fc8d59",
+    // "#fc8d59",
     "#e34a33",
     "#b30000",
-  ].reverse().splice(0, keys.length - 1);
+  ]
+    .reverse()
+    .splice(0, keys.length - 1);
 
-
+  const mainColorScheme = [];
 
   // d3.schemeAccent
   const color = d3
-    .scaleOrdinal([...divergingScheme, "#045a8d"])
+    .scaleOrdinal([...divergingScheme, "grey"]) //#045a8d
     .domain(keys)
+    .unknown("#fdbb84")
 
-    console.log("color", color(OTHERS))
-    console.log("keys", keys)
+  const legendsDiv = document.getElementsByClassName("legends");
+  console.log("legendsDiv", legendsDiv);
 
-  const charactersDiv = document.getElementById("characters-1");
+  Array.from(legendsDiv).forEach((legends) => {
     keys.forEach((key) => {
       const div = document.createElement("div");
-      div.innerHTML = `<div class='characters'>${key}</div><div class='color' style='background: ${color(
+      div.classList.add("legend");
+      div.innerHTML = `<div>${key}</div><div class='color' style='background: ${color(
         key
       )}'></div>`;
-      charactersDiv?.append(div);
-    });
+      console.log("legendsid", legends.id)
+      if(legends.id === `future-toc-legend-ch-${ID}`) {
+        legends?.append(div);
+      }
 
-  // console.log("scheme", divergingScheme)
-  // console.log("color", color("George"))
-  // console.log("color", color("Lennie"))
-  // console.log("color", color("Lennie"))
+    });
+  });
 
   const svg = d3
-    .select(`div#chapter-instance-${ID}`)
+    .select(`div#future-toc-chapter-${ID}`)
     .append("svg")
     .attr("width", "100%")
     .attr("height", "100%")
     .attr("preserveAspectRatio", "xMidYMin meet")
     .attr("viewBox", [viewBoxDim.x, viewBoxDim.y, width, height]);
 
-  const lineWidth = 14.6;
 
   // Append section instances
   svg
     .append("g")
     .selectAll("g")
-    .data(occurence).enter().append("rect")
+    .data(commonData)
+    .enter()
+    .append("rect")
     .attr("class", (d) => d.name)
     .attr("width", lineWidth)
-    .attr("height", barHeight)
-    .attr("x", (d) => x(Number(d.index) - 1))
-    .attr("y", (d) => y(d.sectionID.toString())! + barHeight)
-    .attr("fill", d => color(d.name.toString()))
+    .attr("height", (d) => barHeight / d.numberInGroup)
+    .attr("x", (d) => xScale(Number(d.index) - 1))
+    .attr(
+      "y",
+      (d) =>
+        yScale("Section " + d.sectionID.toString())! +
+        barHeight +
+        (barHeight / d.numberInGroup) * d.groupIndex
+    )
+    .attr("fill", (d) => color(d.name.toString()))
     .attr("opacity", 0.75)
-    .attr("stroke", d => color(d.name.toString()))
+    .attr("stroke", (d) => color(d.name.toString()));
 
 
-  // Append the vertical axis
+  // Append the vertical left axis
   svg
     .append("g")
     .style("font", "16px times")
     .attr("transform", `translate(${0},${marginTop})`)
-    .call(d3.axisLeft(y).tickSize(0))
+    .call(d3.axisLeft(yScale).tickSize(0))
     .selectAll("g")
     .each(function (_, i) {
       const el: any = this;
       d3.select(el.parentNode)
         .insert("svg:a")
         .style("cursor", "pointer")
-        .attr("xlink:href", "chapter-instance.xhtml")      // paths[i]
+        .attr("xlink:href", `future-toc-chapter-${ID}.xhtml`) // paths[i]
         .on("click", (d) => d.fill("blue"))
         .append(() => el);
     })
@@ -141,15 +205,15 @@ export function buildChapterInstance(data:Record<string, Record<string, string |
       g
         .selectAll(".tick text")
         .attr("x", "-15")
-        .attr("y", barHeight/2)
+        .attr("y", barHeight / 2)
         .attr("text-decoration", "underline")
     );
 
-  // append right axis line to mark end of bar
+  // append vertical right axis line to mark end of bar
   svg
     .append("g")
-    .attr("transform", `translate(${width - marginRight * 4.25},0)`)
-    .call(d3.axisRight(y).tickSize(0))
+    .attr("transform", `translate(${width - marginRight * 4.25},${marginTop})`)
+    .call(d3.axisRight(yScale).tickSize(0))
     .style("font", "0px times");
 
   // append x axis for sentence count
@@ -158,14 +222,15 @@ export function buildChapterInstance(data:Record<string, Record<string, string |
     .attr("transform", `translate(${0},${height + marginTop})`)
     .call(
       d3
-        .axisBottom(x)
+        .axisBottom(xScale)
         .tickSize(1.5)
-        .ticks(Math.round(maxEntities / 10))
+        .ticks(Math.floor(maxEntities / 10))
     )
     .call((g) => g.selectAll(".domain").remove());
 
   const axisPosX = width / 2 - marginLeft / 2;
   const axisPosY = height + marginBottom * 4;
+
   // append x text at bottom chart
   svg
     .append("text")

@@ -1,6 +1,26 @@
 import fs from "node:fs";
 import { gptGetChapterSections } from "./gpt-chapter-sections.js";
-import { indexMentions, indexNoMentions, strToSentence } from "./textUtils.js";
+import { indexMentions, indexingNoMentions, strToSentence } from "./textUtils.js";
+
+
+type SectionTitle = {"sectionID": string, "sectionTitle": string}
+type SectionOccurence = {
+  "sectionID": number, "name": string, "index": number
+}
+
+type ChapterSections = {
+  sectionTitles: { sectionID: string; sectionTitle: string }[];
+  sectionOccurence: {
+    sectionID: number;
+    name: string;
+    index: number;
+  }[];
+};
+
+type ChapterOccurence = {
+  chapter: string,
+  occurenceSet: ChapterSections[]
+}
 
 
 // save chapter's section titles to tile
@@ -29,7 +49,7 @@ function saveChapterSectionTitles(folderName:string) {
   }
 
   // divide the chapters into sections and save to file
-  function chapterIntoSections(folderName:string) {
+  function chapterToSections(folderName:string) {
     const sectionsJSON = fs.readFileSync(
       "./src/" + folderName + "section-titles.json",
       "utf-8"
@@ -69,28 +89,30 @@ function saveChapterSectionTitles(folderName:string) {
     fs.writeFileSync("src/steinbeck/chapter-sections.json", sectioningJSON)
   }
 
-  function getChapterSectionOccurence(folderName: string, target: string) {
+  function getChapterSectionOccurence(folderName: string, targetFolder: string) {
     const file = fs.readFileSync("./src/" + folderName + "/chapter-sections.json", "utf-8");
     const chapterSectionsList = JSON.parse(file);
     const entityList = fs.readdirSync("./src/" + folderName + "/named-entities");
-    const occurenceSet: Record<string, Record<string, number | string | string>[]>[] = [];
+    const allChapters: ChapterOccurence[] = [];
 
-    // go through each chapter and their sections
-    for(let i = 0; i < 1; i++) {
+
+    // get occurence for each sections in each chapter
+    for(let i = 0; i <chapterSectionsList.length; i++) {
+      const occurenceSet: ChapterSections[] = [];
       const nameStr = fs.readFileSync(
         "./src/" + folderName + "/named-entities/" + entityList[i],
         "utf-8"
       );
       const characters = JSON.parse(nameStr).characters;
       const sections = chapterSectionsList[i].sections;
-      const sectionOccurence: Record<string, number | string>[] = [];
-      const sectionTitles: Record<string, string>[] = [];
+      const sectionOccurence: SectionOccurence[] = [];
+      const sectionTitles: SectionTitle[] = [];
 
       for(let j = 0; j < sections.length; j++) {
         sectionTitles.push({
-          ["sectionID"]: `${sections[j].sectionID}`, sectionTitle: sections[j].sectionTitle
+          "sectionID": `${sections[j].sectionID}`, sectionTitle: sections[j].sectionTitle
         })
-        const noMentions = indexNoMentions(sections[j].text, characters)
+
         for(let k = 0; k < characters.length; k++) {
           const mentions = indexMentions(sections[j].text, characters[k].name)
           mentions.occurence.forEach( occur => {
@@ -101,6 +123,9 @@ function saveChapterSectionTitles(folderName:string) {
             })
           })
         }
+
+        const currentSection = sectionOccurence.filter(obj => obj.sectionID === j+1)
+        const noMentions = indexingNoMentions(sections[j].text, currentSection)
         noMentions.forEach( occur => {
           sectionOccurence.push({
             sectionID: sections[j].sectionID,
@@ -113,13 +138,15 @@ function saveChapterSectionTitles(folderName:string) {
         sectionTitles,
         sectionOccurence
       })
+      allChapters.push({"chapter": `${i+1}`, "occurenceSet": occurenceSet})
+
     }
-    const occurenceSetJSON = JSON.stringify(occurenceSet);
-    fs.writeFileSync(target, occurenceSetJSON)
+    const occurenceSetJSON = JSON.stringify(allChapters);
+    fs.writeFileSync(targetFolder + "BookOccurence" + ".json", occurenceSetJSON)
   }
 
   export function sectionHandler(folderName:string) {
     // saveChapterSectionTitles(folderName)
-    // chapterIntoSections(folderName)
-    getChapterSectionOccurence(folderName, "templates/chapterInstances/sectionInstance.json")
+    // chapterToSections(folderName)
+    getChapterSectionOccurence(folderName, "templates/chapterInstances/")
   }

@@ -39,7 +39,7 @@ export function modifyOPF(
   epubPath: string,
   manifestItems: { id: string; href: string; "media-type": string }[],
   spineItem: { idref: string },
-  spineItemsExtra: { idref: string }[],
+  spineItemsExtra: { idref: string, linear: string }[],
   opfFile: string,
 ) {
 
@@ -89,11 +89,12 @@ export function modifyOPF(
   console.log("end", endidref)
   const endSpineIdx = getItemIndex(obj.package.spine.itemref, "@_idref", [`${endidref['@_idref']}`])
   console.log("idx", endSpineIdx)
-  
+
   if (endSpineIdx) {
     for(let i = 0; i < spineItemsExtra.length; i ++) {
       obj.package.spine.itemref.splice(endSpineIdx, 0, {
         "@_idref": spineItemsExtra[i].idref,
+        "@_linear": spineItemsExtra[i].linear
       });
     }
   } else {

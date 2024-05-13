@@ -59,6 +59,10 @@ function copyTemplates() {
     copyFilesToFolder("templates/style/future-toc.css", "generated-toc/style", "future-toc.css")
 }
 
+function generateHTMLChapters(chapterCount:number) {
+    
+}
+
 
 export function generateTOC(epubPath: string) {
     copyTemplates();
