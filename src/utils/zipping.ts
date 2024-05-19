@@ -25,7 +25,6 @@ export async function compressToEpub(
 
   const zip = new AdmZip();
   zip.addLocalFolder("./" + extractFileName);
-  console.log("WHAT ERROR!!!");
   await zip.writeZipPromise("compressed/" + fileName + ".epub");
   console.log("Compress successful");
 }
@@ -38,11 +37,10 @@ export async function zipToEpub(extractFileName: string, fileName: string) {
 export function modifyOPF(
   epubPath: string,
   manifestItems: { id: string; href: string; "media-type": string }[],
-  spineItem: { idref: string },
-  spineItemsExtra: { idref: string, linear: string }[],
-  opfFile: string,
+  spineItem: { idref: string; linear: string },
+  spineItemsExtra: { idref: string; linear: string }[],
+  opfFile: string
 ) {
-
   const xmlData = getFileContent(epubPath, "OEBPS", ".opf");
   if (!xmlData) {
     console.log("No opf file");
@@ -59,24 +57,25 @@ export function modifyOPF(
 
   let obj = parser.parse(xmlData);
 
-  for(let i = 0; i < manifestItems.length; i++) {
+  for (let i = 0; i < manifestItems.length; i++) {
     obj.package.manifest.item.splice(0, 0, {
-    "@_id": manifestItems[i].id,
-    "@_href": manifestItems[i].href,
-    "@_media-type": manifestItems[i]["media-type"],
+      "@_id": manifestItems[i].id,
+      "@_href": manifestItems[i].href,
+      "@_media-type": manifestItems[i]["media-type"],
     });
   }
 
-    const spineIdx = getItemIndex(obj.package.spine.itemref, "@_idref", [
+  const spineIdx = getItemIndex(obj.package.spine.itemref, "@_idref", [
     "pg-header",
-    "htmltoc",          //
-    "Cover.html",       // PocketBook InkPad Color 3
-    "imprint.xhtml"     // www.starndardebooks.org
+    "htmltoc", //
+    "Cover.html", // PocketBook InkPad Color 3
+    "imprint.xhtml", // www.starndardebooks.org
   ]);
 
   if (spineIdx) {
     obj.package.spine.itemref.splice(spineIdx, 0, {
       "@_idref": spineItem.idref,
+      "@_linear": spineItem.linear,
     });
   } else {
     console.log("No spine tag");
@@ -84,17 +83,20 @@ export function modifyOPF(
   }
 
   // get index of last spine item
-  const itemrefLength = obj.package.spine.itemref.length
-  const endidref = obj.package.spine.itemref[itemrefLength - 1]
-  console.log("end", endidref)
-  const endSpineIdx = getItemIndex(obj.package.spine.itemref, "@_idref", [`${endidref['@_idref']}`])
-  console.log("idx", endSpineIdx)
+  const itemrefLength = obj.package.spine.itemref.length;
+  const endidref = obj.package.spine.itemref[itemrefLength - 1];
+  const endSpineIdx = getItemIndex(obj.package.spine.itemref, "@_idref", [
+    `${endidref["@_idref"]}`,
+  ]);
+
+  // console.log("end", endidref)
+  // console.log("idx", endSpineIdx)
 
   if (endSpineIdx) {
-    for(let i = 0; i < spineItemsExtra.length; i ++) {
+    for (let i = 0; i < spineItemsExtra.length; i++) {
       obj.package.spine.itemref.splice(endSpineIdx, 0, {
         "@_idref": spineItemsExtra[i].idref,
-        "@_linear": spineItemsExtra[i].linear
+        "@_linear": spineItemsExtra[i].linear,
       });
     }
   } else {
@@ -201,33 +203,15 @@ export function copyFilesToFolder(
 }
 
 export function insertTOCFiles(extractedFolder: string) {
-  // copyFilesToFolder(
-  //   "dist/future-toc.xhtml",
-  //   extractedFolder + "/OEBPS",
-  //   "future-toc.xhtml"
-  // );
-  // copyFilesToFolder(
-  //   "dist/future-toc.css",
-  //   extractedFolder + "/OEBPS",
-  //   "future-toc.css"
-  // );
-  // copyFilesToFolder(
-  //   "dist/future-svg.css",
-  //   extractedFolder + "/OEBPS",
-  //   "future-svg.css"
-  // );
-  // copyFilesToFolder(
-  //   "dist/future-toc.js",
-  //   extractedFolder + "/OEBPS",
-  //   "future-toc.js"
-  // );
-  fs.cp('./dist', extractedFolder +'/OEBPS', { recursive: true }, (err) => {
-    if (err) {
-      console.error(err);
-    } else {
-      console.log("Files copied")
-    }
-  });
+  return new Promise<void>((resolve, error) =>
+    fs.cp("./dist", extractedFolder + "/OEBPS", { recursive: true }, (err) => {
+      if (err) {
+        console.error(err);
+        return error();
+      } else {
+        console.log("Files copied");
+        return resolve();
+      }
+    })
+  );
 }
-
-

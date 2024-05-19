@@ -1,9 +1,7 @@
 import { generateTOC } from "./utils/generateTOC.js";
 import {
   modifyOPF,
-  compressToEpub,
   decompressEpub,
-  copyFilesToFolder,
   insertTOCFiles,
   zipToEpub,
 } from "./utils/zipping.js";
@@ -33,8 +31,8 @@ const extractedFolder = "./extracted/steinbeck - epubbooks";
 
 // const compressFolder = "austen"
 // const compressFolder = "carroll"
-const compressFolder = "steinbeck5-chapter-instance";
-const folderName = "steinbeck/"
+const compressFolder = "steinbeck6-legend-tryout";
+const folderName = "steinbeck/";
 const manifestItems = [
   { id: "future-toc-css", href: "future-toc.css", "media-type": "text/css" },
   {
@@ -54,13 +52,12 @@ const manifestItems = [
   },
 ];
 
-const spineItem = {idref: "future-toc"}
+const spineItem = { idref: "future-toc", linear: "yes" };
 
 // <itemref idref="future-toc-chapter-instance" linear="no"/>
-const spineItemsExtra: { idref: string; linear: string}[] = [];
+const spineItemsExtra: { idref: string; linear: string }[] = [];
 let opfFile = "package.opf";
 
-// decompressEpub(epubPath, extractedFolder);
 const chapterCount = getChapterCount(epubPath);
 for (let i = 0; i < chapterCount; i++) {
   spineItemsExtra.push({
@@ -77,12 +74,24 @@ for (let i = 0; i < chapterCount; i++) {
 // const durations = getReadingTimeChapters(epubPath, extractedFolder)
 // console.log("duration,", durations)
 
+// decompressEpub(epubPath, extractedFolder);
 // generateTOC(epubPath)
 
-// insertTOCFiles(extractedFolder);
-// modifyOPF(epubPath, manifestItem, manifestItemJS, spineItem, extractedFolder + "/OEBPS/" + opfFile, manifestItemExtra);
-modifyOPF(epubPath, manifestItems, spineItem, spineItemsExtra, extractedFolder + "/OEBPS/" + opfFile);
-// zipToEpub(extractedFolder, compressFolder);
-
 // chapterHandler(epubPath, extractedFolder)
-sectionHandler(folderName)
+// sectionHandler(folderName)
+
+const run = async () => {
+  await insertTOCFiles(extractedFolder);
+
+  modifyOPF(
+    epubPath,
+    manifestItems,
+    spineItem,
+    spineItemsExtra,
+    extractedFolder + "/OEBPS/" + opfFile
+  );
+
+  zipToEpub(extractedFolder, compressFolder);
+};
+
+run();

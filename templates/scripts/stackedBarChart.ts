@@ -186,6 +186,8 @@ export function buildStackedBarChart(
     .range([0, height])
     .padding(0.08);
 
+  // const qualitativeScheme = ['#e41a1c','#377eb8','#4daf4a','#984ea3','#ff7f00']
+
   const divergingScheme = [
     "#fdd49e",
     "#fdbb84",
@@ -248,7 +250,7 @@ export function buildStackedBarChart(
     .attr("x", (d) => x(Number(d.occurence) - 1))
     .attr("y", (d) => y(d.chapter.toString())! + barHeight)
     .attr("fill", d => color(d.name.toString()))
-    .attr("opacity", 0.75)
+    // .attr("opacity", 0.75)
     .attr("stroke", d => color(d.name.toString()))
     // .attr("stroke-width", 1.5);
 

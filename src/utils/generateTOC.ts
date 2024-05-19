@@ -59,17 +59,54 @@ function copyTemplates() {
     copyFilesToFolder("templates/style/future-toc.css", "generated-toc/style", "future-toc.css")
 }
 
-function generateHTMLChapters(chapterCount:number) {
-    
+function generateHTMLFilesChapters(sourceFile: string, chapterCount:number) {
+    const xmlData = fs.readFileSync(sourceFile, "utf-8");
+    const options = {
+        ignoreAttributes: false,
+        preserveOrder: false,
+        format: true,
+        suppressEmptyNode: false,
+        attrValueProcessor: true
+      };
+    const parser = new XMLParser(options);
+    const parsed = parser.parse(xmlData);
+
+    for(let i = 0; i < chapterCount; i++) {
+        const obj = parsed;
+        obj.html.head.title = `Chapter ${i+1}`;
+        obj.html.body.h2 = `Chapter ${i+1}`;
+        const div = obj.html.body.div.div.div;
+
+        for(let j = 0; j < div.length; j++) {
+            const element = div[j]['@_id']
+            console.log("element", element)
+            if(element.startsWith(`future-toc-legend-ch-`)) {
+                obj.html.body.div.div.div[j]['@_id'] = `future-toc-legend-ch-${i+1}`
+            }
+            if(element.startsWith(`future-toc-chapter-`)) {
+                obj.html.body.div.div.div[j]['@_id'] = `future-toc-chapter-${i+1}`
+            }
+        }
+
+        const content = Object.assign({"!DOCTYPE html": ""}, obj);
+        const builder = new XMLBuilder(options);
+        const xmlContent = builder.build(content).replace("</!DOCTYPE html>", "").replace("></link>", "/>").replace("></link>", "/>");
+
+
+        fs.writeFileSync(`templates/html/future-toc-chapter-${i+1}.xhtml`, xmlContent)
+    }
+
 }
 
 
 export function generateTOC(epubPath: string) {
     copyTemplates();
-    // const chapterCount = getChapterCount(epubPath);
+    const chapterCount = getChapterCount(epubPath);
     // insertChapterCount(chapterCount);
     // reading time
     // getReadingTimeFromChapters(epubPath, extractedFolder);
-
     // insertHead(epubPath, "generated-toc/toc.xhtml")
+
+    generateHTMLFilesChapters("templates/html/future-toc-chapter-base.xhtml", chapterCount);
+
 }

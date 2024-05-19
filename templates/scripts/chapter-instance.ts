@@ -42,6 +42,18 @@ function getMaxSectionLength(
   return max;
 }
 
+const groupBy = <T, R extends string | number>(
+  arr: T[],
+  callback: (item: T) => R
+) => {
+  return arr.reduce<Record<R, T[]>>((acc, args) => {
+    const key = callback(args);
+    acc[key] ??= [];
+    acc[key].push(args);
+    return acc;
+  }, {} as any);
+};
+
 // get the sentences with multiple characters
 function detectCommonInstances(data: ChapterSections) {
   const commonData: (ChapterSections["sectionOccurence"][number] & {
@@ -54,32 +66,41 @@ function detectCommonInstances(data: ChapterSections) {
       (e) => e.sectionID === i + 1
     );
 
-    const groups = Object.groupBy(sectionData, (data) => data.index);
 
-    const instances = Object.values(groups).flatMap(
-      (group) =>
-        group?.map((instance, index) => ({
-          ...instance,
-          numberInGroup: group.length,
-          groupIndex: index,
-        })) ?? []
-    );
+    const groups = groupBy(sectionData, (data) => data.index);
+    const instances = Object.keys(groups)
+      .map((key) => groups[key as any])
+      .map(
+        (group) =>
+          group?.map((instance, index) => ({
+            ...instance,
+            numberInGroup: group.length,
+            groupIndex: index,
+          })) ?? []
+      )
+      .reduce((x, y) => x.concat(y), []);
 
     commonData.push(...instances);
   }
   return commonData;
 }
 
-
+const debug = (label: string) => {
+  document.body.append(label);
+};
 
 // build the chapterInstance
-export function buildChapterInstance(data: ChapterSections, ID: number) {
+export function buildChapterInstance(
+  data: ChapterSections,
+  ID: number,
+  paths: string[]
+) {
   const mains: string[] = ["George", "Lennie"];
   const keys = [...mains, OTHERS, DESCRIPTIONS];
   const counts = countMentionings(data);
   const maxEntities = Math.max(...counts);
-  const sections: string[] = data.sectionTitles.map((title) =>
-    "Section " + title.sectionID.toString()
+  const sections: string[] = data.sectionTitles.map(
+    (title) => "Section " + title.sectionID.toString()
   );
 
   const occurence: Record<string, string | number>[] = data.sectionOccurence;
@@ -87,8 +108,8 @@ export function buildChapterInstance(data: ChapterSections, ID: number) {
   const maxLength = getMaxSectionLength(occurence);
 
   // console.log("max", maxLength)
-  console.log("data", data);
-  console.log("commonData: ", commonData);
+  // console.log("data", data);
+  // console.log("commonData: ", commonData);
   // console.log("counts", counts);
   // console.log("maxEntities", maxEntities);
   // console.log("occurence", occurence);
@@ -96,7 +117,8 @@ export function buildChapterInstance(data: ChapterSections, ID: number) {
 
   const height = data.sectionTitles.length * (barHeight + barGap);
   const width =
-    document.getElementById(`future-toc-chapter-${ID}`)?.clientWidth ?? 0;
+    document.getElementById(`future-toc-chapter-${ID}`)?.clientWidth ?? 400;
+
   const viewBoxDim = {
     x: -marginLeft,
     y: -marginTop,
@@ -104,7 +126,7 @@ export function buildChapterInstance(data: ChapterSections, ID: number) {
     height: height,
   };
 
-  const lineWidth = Math.floor(width/maxLength);
+  const lineWidth = Math.floor(width / maxLength);
 
   const xScale = d3
     .scaleLinear()
@@ -133,10 +155,10 @@ export function buildChapterInstance(data: ChapterSections, ID: number) {
   const color = d3
     .scaleOrdinal([...divergingScheme, "grey"]) //#045a8d
     .domain(keys)
-    .unknown("#fdbb84")
+    .unknown("#fdbb84");
 
   const legendsDiv = document.getElementsByClassName("legends");
-  console.log("legendsDiv", legendsDiv);
+  // console.log("legendsDiv", legendsDiv);
 
   Array.from(legendsDiv).forEach((legends) => {
     keys.forEach((key) => {
@@ -145,13 +167,13 @@ export function buildChapterInstance(data: ChapterSections, ID: number) {
       div.innerHTML = `<div>${key}</div><div class='color' style='background: ${color(
         key
       )}'></div>`;
-      console.log("legendsid", legends.id)
-      if(legends.id === `future-toc-legend-ch-${ID}`) {
+      console.log("legendsid", legends.id);
+      if (legends.id === `future-toc-legend-ch-${ID}`) {
         legends?.append(div);
       }
-
     });
   });
+
 
   const svg = d3
     .select(`div#future-toc-chapter-${ID}`)
@@ -160,7 +182,6 @@ export function buildChapterInstance(data: ChapterSections, ID: number) {
     .attr("height", "100%")
     .attr("preserveAspectRatio", "xMidYMin meet")
     .attr("viewBox", [viewBoxDim.x, viewBoxDim.y, width, height]);
-
 
   // Append section instances
   svg
@@ -181,9 +202,8 @@ export function buildChapterInstance(data: ChapterSections, ID: number) {
         (barHeight / d.numberInGroup) * d.groupIndex
     )
     .attr("fill", (d) => color(d.name.toString()))
-    .attr("opacity", 0.75)
+    // .attr("opacity", 0.75)
     .attr("stroke", (d) => color(d.name.toString()));
-
 
   // Append the vertical left axis
   svg
@@ -197,8 +217,9 @@ export function buildChapterInstance(data: ChapterSections, ID: number) {
       d3.select(el.parentNode)
         .insert("svg:a")
         .style("cursor", "pointer")
-        .attr("xlink:href", `future-toc-chapter-${ID}.xhtml`) // paths[i]
-        .on("click", (d) => d.fill("blue"))
+        .attr("xlink:href", paths[i])
+        // .on("click", (d) => d.fill("blue"))
+        .style("fill", "blue")
         .append(() => el);
     })
     .call((g) =>
