@@ -2,6 +2,14 @@ h2 {
   text-align: center;
 }
 
+a {
+  color: black;
+}
+a:active {
+  background-color: black;
+  color:white;
+}
+
 .page-grid {
   display: grid;
   grid-template-columns: repeat(1, 1fr);

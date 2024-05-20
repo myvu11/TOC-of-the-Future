@@ -94,7 +94,7 @@ export function modifyOPF(
 
   if (endSpineIdx) {
     for (let i = 0; i < spineItemsExtra.length; i++) {
-      obj.package.spine.itemref.splice(endSpineIdx, 0, {
+      obj.package.spine.itemref.splice(endSpineIdx + i, 0, {
         "@_idref": spineItemsExtra[i].idref,
         "@_linear": spineItemsExtra[i].linear,
       });

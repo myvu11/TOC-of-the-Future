@@ -14,8 +14,8 @@ const Words_Per_Minute: Record<string, number> = {
   fast: 260,
 };
 
-// get all chapter path anmes
-function getChapterFilePaths(epubPath: string) {
+// get all chapter path names
+export function getChapterFilePaths(epubPath: string) {
   const paths = getFilePaths(epubPath, "OEBPS", "html");
   const chapterPaths = paths.filter(
     (path) =>
@@ -233,5 +233,5 @@ export function chapterHandler(epubPath:string, extractedFolder:string) {
   // saveCharactersToFile("steinbeck/")
   // console.log(getChapterFilePaths(epubPath));
   // saveChapterPaths(epubPath, "templates/chapterInstances/chapterPaths.json")
-  // saveBookOccurences("templates/chapterInstances/steinbeck.json");
+  // saveBookOccurences("templates/chapterInstances/stackedData.json");
 }

@@ -1,14 +1,15 @@
 import * as d3 from "d3";
+import { getLegendColors, OTHERS, DESCRIPTIONS, groupBy } from "./utils";
 
 const marginTop = 15;
 const marginRight = 20;
 const marginBottom = 10;
-const marginLeft = 85;
+const marginLeft = 90;
 const barHeight = 25;
 const barGap = 10;
 
-const OTHERS = "secondary";
-const DESCRIPTIONS = "no mentionings";
+// const OTHERS = "secondary";
+// const DESCRIPTIONS = "no mentionings";
 
 type ChapterSections = {
   sectionTitles: { sectionID: string; sectionTitle: string }[];
@@ -42,18 +43,6 @@ function getMaxSectionLength(
   return max;
 }
 
-const groupBy = <T, R extends string | number>(
-  arr: T[],
-  callback: (item: T) => R
-) => {
-  return arr.reduce<Record<R, T[]>>((acc, args) => {
-    const key = callback(args);
-    acc[key] ??= [];
-    acc[key].push(args);
-    return acc;
-  }, {} as any);
-};
-
 // get the sentences with multiple characters
 function detectCommonInstances(data: ChapterSections) {
   const commonData: (ChapterSections["sectionOccurence"][number] & {
@@ -66,8 +55,8 @@ function detectCommonInstances(data: ChapterSections) {
       (e) => e.sectionID === i + 1
     );
 
-
     const groups = groupBy(sectionData, (data) => data.index);
+    // console.log("groups", groups)
     const instances = Object.keys(groups)
       .map((key) => groups[key as any])
       .map(
@@ -93,10 +82,10 @@ const debug = (label: string) => {
 export function buildChapterInstance(
   data: ChapterSections,
   ID: number,
-  paths: string[]
+  paths: string[],
+  topCharacters: string[]
 ) {
-  const mains: string[] = ["George", "Lennie"];
-  const keys = [...mains, OTHERS, DESCRIPTIONS];
+  const keys = [...topCharacters, OTHERS, DESCRIPTIONS];
   const counts = countMentionings(data);
   const maxEntities = Math.max(...counts);
   const sections: string[] = data.sectionTitles.map(
@@ -106,19 +95,15 @@ export function buildChapterInstance(
   const occurence: Record<string, string | number>[] = data.sectionOccurence;
   const commonData = detectCommonInstances(data);
   const maxLength = getMaxSectionLength(occurence);
+  // console.log("data instance", data)
+  // console.log("commonData", commonData)
 
-  // console.log("max", maxLength)
-  // console.log("data", data);
-  // console.log("commonData: ", commonData);
-  // console.log("counts", counts);
-  // console.log("maxEntities", maxEntities);
-  // console.log("occurence", occurence);
-  // console.log("sections", sections);
-
+  // dimensions of svg
   const height = data.sectionTitles.length * (barHeight + barGap);
-  const width =
-    document.getElementById(`future-toc-chapter-${ID}`)?.clientWidth ?? 400;
-
+  const clientWidth =
+    document.getElementById(`future-toc-chapter-${ID}`)?.clientWidth ?? 457;
+  // const width = clientWidth < 457 ? clientWidth : 457;
+  const width = clientWidth;
   const viewBoxDim = {
     x: -marginLeft,
     y: -marginTop,
@@ -139,26 +124,10 @@ export function buildChapterInstance(
     .range([0, height])
     .padding(0.08);
 
-  const divergingScheme = [
-    "#fdd49e",
-    "#fdbb84",
-    // "#fc8d59",
-    "#e34a33",
-    "#b30000",
-  ]
-    .reverse()
-    .splice(0, keys.length - 1);
 
-  const mainColorScheme = [];
-
-  // d3.schemeAccent
-  const color = d3
-    .scaleOrdinal([...divergingScheme, "grey"]) //#045a8d
-    .domain(keys)
-    .unknown("#fdbb84");
+  const color = getLegendColors(keys);
 
   const legendsDiv = document.getElementsByClassName("legends");
-  // console.log("legendsDiv", legendsDiv);
 
   Array.from(legendsDiv).forEach((legends) => {
     keys.forEach((key) => {
@@ -167,7 +136,6 @@ export function buildChapterInstance(
       div.innerHTML = `<div>${key}</div><div class='color' style='background: ${color(
         key
       )}'></div>`;
-      console.log("legendsid", legends.id);
       if (legends.id === `future-toc-legend-ch-${ID}`) {
         legends?.append(div);
       }
@@ -202,14 +170,13 @@ export function buildChapterInstance(
         (barHeight / d.numberInGroup) * d.groupIndex
     )
     .attr("fill", (d) => color(d.name.toString()))
-    // .attr("opacity", 0.75)
     .attr("stroke", (d) => color(d.name.toString()));
 
   // Append the vertical left axis
   svg
     .append("g")
     .style("font", "16px times")
-    .attr("transform", `translate(${0},${marginTop})`)
+    .attr("transform", `translate(${0},${marginTop+10})`)
     .call(d3.axisLeft(yScale).tickSize(0))
     .selectAll("g")
     .each(function (_, i) {
@@ -217,16 +184,15 @@ export function buildChapterInstance(
       d3.select(el.parentNode)
         .insert("svg:a")
         .style("cursor", "pointer")
+        .on("click", () => d3.select(this).style("fill", "blue"))
         .attr("xlink:href", paths[i])
-        // .on("click", (d) => d.fill("blue"))
-        .style("fill", "blue")
         .append(() => el);
     })
     .call((g) =>
       g
         .selectAll(".tick text")
-        .attr("x", "-15")
-        .attr("y", barHeight / 2)
+        .attr("x", -15)
+        .attr("y", -barHeight/5)
         .attr("text-decoration", "underline")
     );
 
@@ -240,7 +206,7 @@ export function buildChapterInstance(
   // append x axis for sentence count
   svg
     .append("g")
-    .attr("transform", `translate(${0},${height + marginTop})`)
+    .attr("transform", `translate(${0},${height + marginTop + 10})`)
     .call(
       d3
         .axisBottom(xScale)
@@ -250,7 +216,7 @@ export function buildChapterInstance(
     .call((g) => g.selectAll(".domain").remove());
 
   const axisPosX = width / 2 - marginLeft / 2;
-  const axisPosY = height + marginBottom * 4;
+  const axisPosY = height + marginBottom * 6;
 
   // append x text at bottom chart
   svg

@@ -2,6 +2,8 @@ import fs from "node:fs";
 import { gptGetChapterSections } from "./gpt-chapter-sections.js";
 import { indexMentions, indexingNoMentions, strToSentence } from "./textUtils.js";
 
+export const OTHERS = "secondary";
+export const DESCRIPTIONS = "no entity";
 
 type SectionTitle = {"sectionID": string, "sectionTitle": string}
 type SectionOccurence = {
@@ -129,7 +131,7 @@ function saveChapterSectionTitles(folderName:string) {
         noMentions.forEach( occur => {
           sectionOccurence.push({
             sectionID: sections[j].sectionID,
-            name: "no mentionings",
+            name: DESCRIPTIONS,
             index: occur
           })
         })

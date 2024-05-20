@@ -1,4 +1,5 @@
 import * as d3 from "d3";
+import { getLegendColors, OTHERS, DESCRIPTIONS, groupBy } from "./utils";
 
 // Specify the chart’s dimensions
 
@@ -8,10 +9,7 @@ const marginBottom = 10;
 const marginLeft = 85;
 const barHeight = 25;
 const barGap = 35;
-const numberOfMains = 4;
 
-const OTHERS = "secondary";
-const DESCRIPTIONS = "no mentionings";
 
 interface ChapterOccurence {
   chapterTitle: string;
@@ -27,6 +25,11 @@ interface ChapterOccurence {
   description: number[];
 }
 
+interface InstanceData {
+  chapter: string,
+  name: string,
+  index: number}
+
 function getChapterTitles(data: ChapterOccurence[]) {
   let keys: string[] = [];
   for (let i = 0; i < data.length; i++) {
@@ -35,40 +38,9 @@ function getChapterTitles(data: ChapterOccurence[]) {
   return keys;
 }
 
-// get top n characters of the book
-function getTops(data: ChapterOccurence[], n: number) {
-
-  let countOccurence: Record<string, string | number>[] = [];
-  for (let i = 0; i < data.length; i++) {
-    for (let j = 0; j < data[i].characters.length; j++) {
-      const character: string = data[i].characters[j].name;
-      const index = countOccurence.findIndex((e) => e.name === character);
-      const occurenceLength = data[i].characters[j].occurence.length;
-      if (index !== -1) {
-        const prevCount = Number(countOccurence[index].count);
-        const newCount = prevCount + occurenceLength;
-        countOccurence[index] = { name: character, count: newCount };
-      } else {
-        countOccurence.push({ name: character, count: occurenceLength });
-      }
-    }
-  }
-  const res = Object(countOccurence).sort(
-    (a: Record<string, string | number>, b: Record<string, string | number>) =>
-      Number(b.count) - Number(a.count)
-  );
-
-  const keys: string[] = res.map((e: Record<string, string | number>) =>
-    String(e.name)
-  );
-  if (keys.length > n) {
-    return keys.slice(0, n);
-  }
-  return keys;
-}
 
 // format data for stacked bar chart
-function formatToChartData(data: ChapterOccurence[], main: string[]) {
+function formatToStackData(data: ChapterOccurence[], main: string[]) {
   const chartData: Record<string, string | number>[] = [];
   for (let i = 0; i < data.length; i++) {
     const charactersCount = data[i].characters.length;
@@ -96,6 +68,7 @@ function formatToChartData(data: ChapterOccurence[], main: string[]) {
       chapterTitle: data[i].chapterTitle,
       sentenceCount: data[i].sentenceCount,
       ...countEntities,
+      // [DESCRIPTIONS]: data[i].description.length,
       [DESCRIPTIONS]: data[i].sentenceCount - maxEntity,
     });
   }
@@ -104,7 +77,8 @@ function formatToChartData(data: ChapterOccurence[], main: string[]) {
 
 // format data for instance chart
 function formatToInstanceData(data: ChapterOccurence[], main: string[]) {
-  const instanceData: Record<string, string | number>[] = [];
+  // const instanceData: Record<string, string | number>[] = [];
+  const instanceData: InstanceData[] = [];
   for (let i = 0; i < data.length; i++) {
     const characters = data[i].characters;
     for (let j = 0; j < data[i].characters.length; j++) {
@@ -112,61 +86,93 @@ function formatToInstanceData(data: ChapterOccurence[], main: string[]) {
       if (main.findIndex((e) => e === name) === -1 && name !== DESCRIPTIONS) {
         name = OTHERS;
       }
-      if(name === DESCRIPTIONS) {
-        name = DESCRIPTIONS
+      if (name === DESCRIPTIONS) {
+        name = DESCRIPTIONS;
       }
       characters[j].occurence.forEach((occur) =>
         instanceData.push({
           chapter: data[i].chapterTitle,
           name: name,
-          occurence: occur,
+          index: occur,
         })
       );
     }
-    data[i].description.forEach( d => instanceData.push({
-      chapter: data[i].chapterTitle,
-      name: DESCRIPTIONS,
-      occurence: d,
-    }))
+    data[i].description.forEach((d) =>
+      instanceData.push({
+        chapter: data[i].chapterTitle,
+        name: DESCRIPTIONS,
+        index: d,
+      })
+    );
   }
 
   return instanceData;
+}
+
+function getCommonData(instanceData: InstanceData[]) {
+
+  const groupChapters = groupBy(instanceData, d => d.chapter)
+  const instances = Object.values(groupChapters)
+    .map(chapter => groupBy(chapter, d => d.index))
+    .map(chapter => Object.values(chapter).map((group) => group.map((instance, index) => [{
+    ...instance,
+    numberInGroup: group.length,
+    groupIndex: index
+    }
+  ])))
+  .reduce((x, y) => x.concat(y), [])
+  .reduce((x, y) => x.concat(y), [])
+  .reduce((x, y) => x.concat(y), [])
+
+  return instances
+
 }
 
 const sum = (n: number[]) => n.reduce((acc, i) => acc + i, 0);
 
 export function buildStackedBarChart(
   data: ChapterOccurence[],
-  paths: string[]
+  topCharacters: string[],
+  stackOrder: string[],
+  ID = 0
 ) {
-  // Determine the series that need to be stacked.
-  // console.log("data", data);
-
   const groups = getChapterTitles(data);
-  let topCharacters = getTops(data, numberOfMains);
   const stackKeys = [...topCharacters, OTHERS, DESCRIPTIONS];
-  const chartData = formatToChartData(data, topCharacters);
+  const chartData = formatToStackData(data, topCharacters);
   const instanceData = formatToInstanceData(data, topCharacters);
+  const commonData = getCommonData(instanceData)
 
+  // console.log("data stacked", data)
   // console.log("groups", groups);
   // console.log("stackKeys", stackKeys);
   // console.log("chartdata", chartData);
   // console.log("instancedata", instanceData);
+  // console.log("stacked commonData", commonData);
 
-  const stackedData = d3.stack().keys(stackKeys)(chartData);
+  const stackedData = d3.stack().keys(stackOrder)(chartData);
 
-  const maxEntities = Math.max(
+  const maxSumCharacter= Math.max(
     ...chartData.map((chapter: any) => {
       return sum(stackKeys.map((key) => chapter[key] ?? 0));
     })
   );
+
+  const maxSentence = Math.max(
+    ...chartData.map((chapter: any) => {
+      return chapter.sentenceCount;
+    })
+  );
+
+  const maxEntities = Math.max(maxSumCharacter, maxSentence)
 
   // console.log("max", maxEntities);
   // console.log("stackedData", stackedData);
 
   // Compute the height from the number of stacks.
   const height = stackedData[0].length * (barHeight + barGap);
-  const width = document.getElementById("stacked")?.clientWidth ?? 0;
+  const clientWidth = document.getElementById("stacked")?.clientWidth ?? 400
+  // const width = clientWidth < 457 ? clientWidth : 457;
+  const width = clientWidth
   const viewBoxDim = {
     x: -marginLeft,
     y: -marginTop,
@@ -175,34 +181,21 @@ export function buildStackedBarChart(
   };
 
   // Prepare the scales for positional and color encodings.
-  const x = d3
+  const xScale = d3
     .scaleLinear()
     .domain([0, maxEntities])
     .range([0, width - marginLeft]);
 
-  const y = d3
+  const yScale = d3
     .scaleBand<string>()
     .domain(groups)
     .range([0, height])
     .padding(0.08);
 
-  // const qualitativeScheme = ['#e41a1c','#377eb8','#4daf4a','#984ea3','#ff7f00']
-
-  const divergingScheme = [
-    "#fdd49e",
-    "#fdbb84",
-    "#fc8d59",
-    "#e34a33",
-    "#b30000",
-  ].reverse().splice(0, numberOfMains+1);
-  // d3.schemeAccent
-  const color = d3
-    .scaleOrdinal<string>([...divergingScheme, "grey"]) //#045a8d
-    .domain(stackKeys)
-    // .unknown("#ccc");
+  const color = getLegendColors(stackKeys);
 
   const charactersDiv = document.getElementById("characters");
-  stackKeys.forEach((key) => {
+  stackOrder.forEach((key) => {
     const div = document.createElement("div");
     div.classList.add("legend");
     div.innerHTML = `<div>${key}</div><div class='color' style='background: ${color(
@@ -230,10 +223,10 @@ export function buildStackedBarChart(
     .selectAll("rect")
     .data((d) => d)
     .join("rect")
-    .attr("x", (d) => x(d[0]))
-    .attr("y", (d) => y(d.data.chapterTitle.toString())!)
+    .attr("x", (d) => xScale(d[0]))
+    .attr("y", (d) => yScale(d.data.chapterTitle.toString())!)
     .attr("height", barHeight)
-    .attr("width", (d) => x(d[1]) - x(d[0]))
+    .attr("width", (d) => xScale(d[1]) - xScale(d[0]));
   // .style("stroke", "white")
   // .style("stroke-dasharray", ('5, 5'));
   // .append("title")
@@ -241,32 +234,33 @@ export function buildStackedBarChart(
 
   const lineWidth = 0.25;
   // Append instance chart
-  svg.append("g")
+  svg
+    .append("g")
     .selectAll("g")
-    .data(instanceData).enter().append("rect")
+    .data(commonData)
+    .enter()
+    .append("rect")
     .attr("class", (d) => d.name)
     .attr("width", lineWidth)
-    .attr("height", barHeight)
-    .attr("x", (d) => x(Number(d.occurence) - 1))
-    .attr("y", (d) => y(d.chapter.toString())! + barHeight)
-    .attr("fill", d => color(d.name.toString()))
-    // .attr("opacity", 0.75)
-    .attr("stroke", d => color(d.name.toString()))
-    // .attr("stroke-width", 1.5);
+    .attr("height", d => barHeight / d.numberInGroup)
+    .attr("x", (d) => xScale(Number(d.index) - 1))
+    .attr("y", (d) => yScale(d.chapter)! + barHeight + (barHeight / d.numberInGroup) * d.groupIndex)
+    .attr("fill", (d) => color(d.name))
+    .attr("stroke", (d) => color(d.name));
 
-  // Append the vertical axis
+  // Append the vertical left axis
   svg
     .append("g")
     .style("font", "16px times")
     .attr("transform", `translate(${0},0)`)
-    .call(d3.axisLeft(y).tickSize(0))
+    .call(d3.axisLeft(yScale).tickSize(0))
     .selectAll("g")
     .each(function (_, i) {
       const el: any = this;
       d3.select(el.parentNode)
         .insert("svg:a")
         .style("cursor", "pointer")
-        .attr("xlink:href", `future-toc-chapter-${i+1}.xhtml`)      // paths[i]
+        .attr("xlink:href", `future-toc-chapter-${i + 1}.xhtml`) // paths[i]
         .on("click", (d) => d.fill("blue"))
         .append(() => el);
     })
@@ -274,7 +268,7 @@ export function buildStackedBarChart(
       g
         .selectAll(".tick text")
         .attr("x", "-15")
-        .attr("y", -barHeight / 3)
+        .attr("y", -barHeight / 1.5)
         .attr("text-decoration", "underline")
     );
 
@@ -282,7 +276,7 @@ export function buildStackedBarChart(
   svg
     .append("g")
     .attr("transform", `translate(${width - marginRight * 4.25},${0})`)
-    .call(d3.axisRight(y).tickSize(0))
+    .call(d3.axisRight(yScale).tickSize(0))
     .style("font", "0px times");
 
   // append x axis for sentence count
@@ -291,14 +285,14 @@ export function buildStackedBarChart(
     .attr("transform", `translate(${0},${height})`)
     .call(
       d3
-        .axisBottom(x)
+        .axisBottom(xScale)
         .tickSize(1.5)
         .ticks(Math.round(maxEntities / 100))
     )
     .call((g) => g.selectAll(".domain").remove());
   // .style("font", "0px times")
 
-
+  svg
   const axisLabelX = width / 2 - marginLeft / 2;
   const axisLabelY = height + marginBottom * 4;
 
@@ -311,34 +305,4 @@ export function buildStackedBarChart(
     .text("Sentences")
     .style("font", "16px times");
 
-
-
-  // // Append categorical legend
-  // const size = 20;
-  // const spaceSize = 45;
-  // const posY = -105;
-  // svg
-  //   .append("g")
-  //   .selectAll("legend")
-  //   .data(stackKeys)
-  //   .enter()
-  //   .append("rect")
-  //   .attr("x", (_, i) => i * (size * 2 + spaceSize))
-  //   .attr("y", posY)
-  //   .attr("width", size * 2)
-  //   .attr("height", size)
-  //   .style("fill", (d) => color(d));
-
-  // svg
-  //   .append("g")
-  //   .selectAll("legend")
-  //   .data(stackKeys)
-  //   .enter()
-  //   .append("text")
-  //   .attr("x", (_, i) => i * (size * 2 + spaceSize))
-  //   .attr("y", -115)
-  //   .style("fill", "black")
-  //   .text((d) => d)
-  //   .attr("text-anchor", "top")
-  //   .style("alignment baseline", "left");
 }

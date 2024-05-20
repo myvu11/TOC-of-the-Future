@@ -8,9 +8,7 @@ import {
 import {
   chapterHandler,
   getChapterCount,
-  getReadingTimeChapters,
 } from "./utils/chapterHandling.js";
-import { writeFileSync } from "fs";
 import { sectionHandler } from "./utils/sectionHandlling.js";
 
 // const epubPath = "./epub-files/okakura-book-of-tea.epub";
@@ -31,7 +29,7 @@ const extractedFolder = "./extracted/steinbeck - epubbooks";
 
 // const compressFolder = "austen"
 // const compressFolder = "carroll"
-const compressFolder = "steinbeck6-legend-tryout";
+const compressFolder = "steinbeck7-overview-common-instance";
 const folderName = "steinbeck/";
 const manifestItems = [
   { id: "future-toc-css", href: "future-toc.css", "media-type": "text/css" },
@@ -71,8 +69,6 @@ for (let i = 0; i < chapterCount; i++) {
   });
 }
 
-// const durations = getReadingTimeChapters(epubPath, extractedFolder)
-// console.log("duration,", durations)
 
 // decompressEpub(epubPath, extractedFolder);
 // generateTOC(epubPath)
