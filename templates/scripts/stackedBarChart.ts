@@ -1,15 +1,16 @@
 import * as d3 from "d3";
 import { getLegendColors, OTHERS, DESCRIPTIONS, groupBy } from "./utils";
 
-// Specify the chart’s dimensions
+const NAMEID = "future-toc-entity";
+const LEGENDID = "future-toc-entity-legend";
+const CHAPTER = "future-toc-chapter";
 
 const marginTop = 35;
 const marginRight = 20;
 const marginBottom = 10;
 const marginLeft = 85;
 const barHeight = 25;
-const barGap = 35;
-
+const barGap = 10;
 
 interface ChapterOccurence {
   chapterTitle: string;
@@ -26,9 +27,10 @@ interface ChapterOccurence {
 }
 
 interface InstanceData {
-  chapter: string,
-  name: string,
-  index: number}
+  chapter: string;
+  name: string;
+  index: number;
+}
 
 function getChapterTitles(data: ChapterOccurence[]) {
   let keys: string[] = [];
@@ -37,7 +39,6 @@ function getChapterTitles(data: ChapterOccurence[]) {
   }
   return keys;
 }
-
 
 // format data for stacked bar chart
 function formatToStackData(data: ChapterOccurence[], main: string[]) {
@@ -110,22 +111,25 @@ function formatToInstanceData(data: ChapterOccurence[], main: string[]) {
 }
 
 function getCommonData(instanceData: InstanceData[]) {
-
-  const groupChapters = groupBy(instanceData, d => d.chapter)
+  const groupChapters = groupBy(instanceData, (d) => d.chapter);
   const instances = Object.values(groupChapters)
-    .map(chapter => groupBy(chapter, d => d.index))
-    .map(chapter => Object.values(chapter).map((group) => group.map((instance, index) => [{
-    ...instance,
-    numberInGroup: group.length,
-    groupIndex: index
-    }
-  ])))
-  .reduce((x, y) => x.concat(y), [])
-  .reduce((x, y) => x.concat(y), [])
-  .reduce((x, y) => x.concat(y), [])
+    .map((chapter) => groupBy(chapter, (d) => d.index))
+    .map((chapter) =>
+      Object.values(chapter).map((group) =>
+        group.map((instance, index) => [
+          {
+            ...instance,
+            numberInGroup: group.length,
+            groupIndex: index,
+          },
+        ])
+      )
+    )
+    .reduce((x, y) => x.concat(y), [])
+    .reduce((x, y) => x.concat(y), [])
+    .reduce((x, y) => x.concat(y), []);
 
-  return instances
-
+  return instances;
 }
 
 const sum = (n: number[]) => n.reduce((acc, i) => acc + i, 0);
@@ -134,26 +138,26 @@ export function buildStackedBarChart(
   data: ChapterOccurence[],
   topCharacters: string[],
   stackOrder: string[],
-  ID = 0
+  ID: number,
+  // onCharacterClick: (i: number) => void
 ) {
   const groups = getChapterTitles(data);
-  const stackKeys = [...topCharacters, OTHERS, DESCRIPTIONS];
+  const entities = [...topCharacters, OTHERS, DESCRIPTIONS];
   const chartData = formatToStackData(data, topCharacters);
   const instanceData = formatToInstanceData(data, topCharacters);
-  const commonData = getCommonData(instanceData)
+  const commonData = getCommonData(instanceData);
 
   // console.log("data stacked", data)
   // console.log("groups", groups);
-  // console.log("stackKeys", stackKeys);
+  // console.log("entities", entities);
   // console.log("chartdata", chartData);
   // console.log("instancedata", instanceData);
   // console.log("stacked commonData", commonData);
-
   const stackedData = d3.stack().keys(stackOrder)(chartData);
 
-  const maxSumCharacter= Math.max(
+  const maxSumCharacter = Math.max(
     ...chartData.map((chapter: any) => {
-      return sum(stackKeys.map((key) => chapter[key] ?? 0));
+      return sum(entities.map((key) => chapter[key] ?? 0));
     })
   );
 
@@ -163,22 +167,23 @@ export function buildStackedBarChart(
     })
   );
 
-  const maxEntities = Math.max(maxSumCharacter, maxSentence)
+  const maxEntities = Math.max(maxSumCharacter, maxSentence);
 
   // console.log("max", maxEntities);
   // console.log("stackedData", stackedData);
 
   // Compute the height from the number of stacks.
-  const height = stackedData[0].length * (barHeight + barGap);
-  const clientWidth = document.getElementById("stacked")?.clientWidth ?? 400
+  const height = stackedData[0].length * (barHeight*2 + barGap);
+  const clientWidth = document.getElementById(`${NAMEID}-${ID}`)?.clientWidth ?? 450;
   // const width = clientWidth < 457 ? clientWidth : 457;
-  const width = clientWidth
+  const width = clientWidth;
   const viewBoxDim = {
     x: -marginLeft,
     y: -marginTop,
     width: width,
     height: height,
   };
+
 
   // Prepare the scales for positional and color encodings.
   const xScale = d3
@@ -192,21 +197,34 @@ export function buildStackedBarChart(
     .range([0, height])
     .padding(0.08);
 
-  const color = getLegendColors(stackKeys);
+  const color = getLegendColors(entities);
+  document
+  const legendsDiv = document.getElementsByClassName("legends");
+  // console.log("legendsDiv", legendsDiv)
+  Array.from(legendsDiv).forEach((legends) => {
+    stackOrder.forEach((key) => {
+      const div = document.createElement("div");
+      div.classList.add("legend");
+      const index = entities.indexOf(key)+1;
+      div.innerHTML = `<a href='${NAMEID}-${index}.xhtml'><div>${key}</div></a><div class='color' style='background: ${color(
+        key
+      )}'></div>`;
+      // div.onclick = () => {return onCharacterClick(index)};
+      // document.getElementById("future-toc-entity-0")?.addEventListener("click", onCharacterClick(index), false)
 
-  const charactersDiv = document.getElementById("characters");
-  stackOrder.forEach((key) => {
-    const div = document.createElement("div");
-    div.classList.add("legend");
-    div.innerHTML = `<div>${key}</div><div class='color' style='background: ${color(
-      key
-    )}'></div>`;
-    charactersDiv?.append(div);
+      // if (!legends.id.startsWith("future-toc-legend-ch-")) {
+      //   legends?.append(div);
+
+      // }
+      if (legends.id === `${LEGENDID}-${ID}`) {
+          legends?.append(div);
+        }
+    });
   });
 
   // Create the SVG container.
   const svg = d3
-    .select("div#stacked")
+    .select(`div#${NAMEID}-${ID}`)
     .append("svg")
     .attr("width", "100%")
     .attr("height", "100%")
@@ -229,8 +247,6 @@ export function buildStackedBarChart(
     .attr("width", (d) => xScale(d[1]) - xScale(d[0]));
   // .style("stroke", "white")
   // .style("stroke-dasharray", ('5, 5'));
-  // .append("title")
-  // .text((d) => `${d.data.chapterTitle}`);
 
   const lineWidth = 0.25;
   // Append instance chart
@@ -242,9 +258,15 @@ export function buildStackedBarChart(
     .append("rect")
     .attr("class", (d) => d.name)
     .attr("width", lineWidth)
-    .attr("height", d => barHeight / d.numberInGroup)
+    .attr("height", (d) => barHeight / d.numberInGroup)
     .attr("x", (d) => xScale(Number(d.index) - 1))
-    .attr("y", (d) => yScale(d.chapter)! + barHeight + (barHeight / d.numberInGroup) * d.groupIndex)
+    .attr(
+      "y",
+      (d) =>
+        yScale(d.chapter)! +
+        barHeight +
+        (barHeight / d.numberInGroup) * d.groupIndex
+    )
     .attr("fill", (d) => color(d.name))
     .attr("stroke", (d) => color(d.name));
 
@@ -260,8 +282,7 @@ export function buildStackedBarChart(
       d3.select(el.parentNode)
         .insert("svg:a")
         .style("cursor", "pointer")
-        .attr("xlink:href", `future-toc-chapter-${i + 1}.xhtml`) // paths[i]
-        .on("click", (d) => d.fill("blue"))
+        .attr("xlink:href", `${CHAPTER}-${i + 1}.xhtml`) // paths[i]
         .append(() => el);
     })
     .call((g) =>
@@ -292,7 +313,7 @@ export function buildStackedBarChart(
     .call((g) => g.selectAll(".domain").remove());
   // .style("font", "0px times")
 
-  svg
+  svg;
   const axisLabelX = width / 2 - marginLeft / 2;
   const axisLabelY = height + marginBottom * 4;
 
@@ -304,5 +325,4 @@ export function buildStackedBarChart(
     .attr("text-anchor", "end")
     .text("Sentences")
     .style("font", "16px times");
-
 }

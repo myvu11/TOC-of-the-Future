@@ -1,6 +1,8 @@
 import * as d3 from "d3";
-import { getLegendColors, OTHERS, DESCRIPTIONS, groupBy } from "./utils";
+import { getLegendColors, groupBy } from "./utils";
 
+
+const CHAPTER = "future-toc-chapter";
 const marginTop = 15;
 const marginRight = 20;
 const marginBottom = 10;
@@ -83,9 +85,8 @@ export function buildChapterInstance(
   data: ChapterSections,
   ID: number,
   paths: string[],
-  topCharacters: string[]
+  entities: string[]
 ) {
-  const keys = [...topCharacters, OTHERS, DESCRIPTIONS];
   const counts = countMentionings(data);
   const maxEntities = Math.max(...counts);
   const sections: string[] = data.sectionTitles.map(
@@ -101,7 +102,7 @@ export function buildChapterInstance(
   // dimensions of svg
   const height = data.sectionTitles.length * (barHeight + barGap);
   const clientWidth =
-    document.getElementById(`future-toc-chapter-${ID}`)?.clientWidth ?? 457;
+    document.getElementById(`${CHAPTER}-${ID}`)?.clientWidth ?? 457;
   // const width = clientWidth < 457 ? clientWidth : 457;
   const width = clientWidth;
   const viewBoxDim = {
@@ -125,12 +126,12 @@ export function buildChapterInstance(
     .padding(0.08);
 
 
-  const color = getLegendColors(keys);
+  const color = getLegendColors(entities);
 
   const legendsDiv = document.getElementsByClassName("legends");
 
   Array.from(legendsDiv).forEach((legends) => {
-    keys.forEach((key) => {
+    entities.forEach((key) => {
       const div = document.createElement("div");
       div.classList.add("legend");
       div.innerHTML = `<div>${key}</div><div class='color' style='background: ${color(
@@ -142,9 +143,8 @@ export function buildChapterInstance(
     });
   });
 
-
   const svg = d3
-    .select(`div#future-toc-chapter-${ID}`)
+    .select(`div#${CHAPTER}-${ID}`)
     .append("svg")
     .attr("width", "100%")
     .attr("height", "100%")
@@ -183,9 +183,8 @@ export function buildChapterInstance(
       const el: any = this;
       d3.select(el.parentNode)
         .insert("svg:a")
-        .style("cursor", "pointer")
-        .on("click", () => d3.select(this).style("fill", "blue"))
-        .attr("xlink:href", paths[i])
+        // .style("cursor", "pointer")
+        // .attr("xlink:href", paths[i])
         .append(() => el);
     })
     .call((g) =>
@@ -193,7 +192,7 @@ export function buildChapterInstance(
         .selectAll(".tick text")
         .attr("x", -15)
         .attr("y", -barHeight/5)
-        .attr("text-decoration", "underline")
+        // .attr("text-decoration", "underline")
     );
 
   // append vertical right axis line to mark end of bar

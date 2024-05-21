@@ -2,6 +2,27 @@ import { copyFilesToFolder, getFileContent } from "./zipping.js";
 import { getChapterCount, getChapterFilePaths } from "./chapterHandling.js";
 import fs from "node:fs";
 import { XMLParser, XMLBuilder } from "fast-xml-parser";
+import chaptersOccurences from "../../templates/chapterInstances/steinbeck.json" assert { type: "json" };
+import { getTops, OTHERS, DESCRIPTIONS } from "../../templates/scripts/utils.js"
+
+
+const NAMEID = "future-toc-entity-";
+const LEGENDID = "future-toc-entity-legend-";
+
+interface ChapterOccurence {
+  chapterTitle: string;
+  sentenceCount: number;
+  characters: {
+    name: string;
+    occurence: number[];
+  }[];
+  locations: {
+    name: string;
+    occurence: number[];
+  }[];
+  description: number[];
+}
+
 
 // insert ebooks html head to toc template
 function insertHead(epubPath: string, destination: string) {
@@ -64,7 +85,7 @@ function generateHTMLFilesChapters(sourceFile: string, chapterPaths: string[]) {
   const parsed = parser.parse(xmlData);
 
   for (let i = 0; i < chapterPaths.length; i++) {
-    const obj = parsed;
+    const obj = {...parsed};
     console.log("obj", obj.html.body.h2.a)
     obj.html.head.title = `Chapter ${i + 1}`;
     obj.html.body.h2.a["@_href"] = chapterPaths[i].replace("OEBPS/", "")
@@ -98,20 +119,59 @@ function generateHTMLFilesChapters(sourceFile: string, chapterPaths: string[]) {
   }
 }
 
-function generateHTMLFilesOverview() {
-  
+function generateHTMLFilesOverview(sourceFile: string) {
+  const xmlData = fs.readFileSync(sourceFile, "utf-8");
+  const options = {
+    ignoreAttributes: false,
+    preserveOrder: false,
+    format: true,
+    suppressEmptyNode: false,
+    attrValueProcessor: true,
+  };
+  const parser = new XMLParser(options);
+  const parsed = parser.parse(xmlData);
+  const topCharacters = getTops(chaptersOccurences);
+  const entities = [...topCharacters, OTHERS, DESCRIPTIONS];
+
+  for(let i = 0; i < entities.length; i++) {
+    const obj = {...parsed}
+
+    const div = obj.html.body.div.div.div
+    div.forEach((e:any, index:number) => {
+      if(e["@_id"].startsWith(`${LEGENDID}`)) {
+        obj.html.body.div.div.div[index]["@_id"] = `${LEGENDID}${i+1}`;
+      }
+      else if(e["@_id"].startsWith(`${NAMEID}`)) {
+        obj.html.body.div.div.div[index]["@_id"] = `${NAMEID}${i+1}`;
+      }
+    })
+
+    const content = Object.assign({ "!DOCTYPE html": "" }, obj);
+    const builder = new XMLBuilder(options);
+    const xmlContent = builder
+      .build(content)
+      .replace("</!DOCTYPE html>", "")
+      .replace("></link>", "/>")
+      .replace("></link>", "/>");
+
+    fs.writeFileSync(
+      `templates/html/future-toc-entity-${i + 1}.xhtml`,
+      xmlContent
+    );
+  }
 }
 
 export function generateTOC(epubPath: string) {
-  const chapterCount = getChapterCount(epubPath);
-  const chapterPaths = getChapterFilePaths(epubPath);
-  console.log("paths", chapterPaths)
+  // const chapterCount = getChapterCount(epubPath);
+  // const chapterPaths = getChapterFilePaths(epubPath);
+  // console.log("paths", chapterPaths)
   // insertChapterCount(chapterCount);
   // getReadingTimeFromChapters(epubPath, extractedFolder);
   // insertHead(epubPath, "generated-toc/toc.xhtml")
 
-  generateHTMLFilesChapters(
-    "templates/html/future-toc-chapter-base.xhtml",
-    chapterPaths
-  );
+  // generateHTMLFilesChapters(
+  //   "templates/html/future-toc-chapter-base.xhtml",
+  //   chapterPaths
+  // );
+  generateHTMLFilesOverview("templates/html/future-toc.xhtml")
 }

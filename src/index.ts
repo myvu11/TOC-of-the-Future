@@ -10,9 +10,13 @@ import {
   getChapterCount,
 } from "./utils/chapterHandling.js";
 import { sectionHandler } from "./utils/sectionHandlling.js";
+import { getTops, OTHERS, DESCRIPTIONS } from "../templates/scripts/utils.js"
+import chaptersOccurences from "../templates/chapterInstances/steinbeck.json" assert { type: "json" };
+
+const FILENAMEENTITY = "future-toc-entity";
+const FILENAMECHAPTER = "future-toc-echapter";
 
 // const epubPath = "./epub-files/okakura-book-of-tea.epub";
-
 // const epubPath = "./epub-files/Alice's Adventure in Wonderland by Lewis Carroll - Project Gutenberg.epub";
 // const epubPath = "./epub-files/Oliver Twist by Charles Dickens - Project Gutenberg.epub";
 // const epubPath = "./epub-files/Austen, Jane - Pride and Prejudice.epub";
@@ -29,8 +33,9 @@ const extractedFolder = "./extracted/steinbeck - epubbooks";
 
 // const compressFolder = "austen"
 // const compressFolder = "carroll"
-const compressFolder = "steinbeck7-overview-common-instance";
+const compressFolder = "steinbeck8-chapterinstance-legend-choice";
 const folderName = "steinbeck/";
+
 const manifestItems = [
   { id: "future-toc-css", href: "future-toc.css", "media-type": "text/css" },
   {
@@ -51,11 +56,24 @@ const manifestItems = [
 ];
 
 const spineItem = { idref: "future-toc", linear: "yes" };
-
-// <itemref idref="future-toc-chapter-instance" linear="no"/>
 const spineItemsExtra: { idref: string; linear: string }[] = [];
 let opfFile = "package.opf";
+const topCharacters = getTops(chaptersOccurences);
+const entities = [...topCharacters, OTHERS, DESCRIPTIONS];
 
+// generate list of entity xhtml to be inserted in opf-file
+for (let i = 0; i < entities.length; i++) {
+  spineItemsExtra.push({
+    idref: `${FILENAMEENTITY}-${i+1}`,
+    linear: "no"
+  })
+  manifestItems.push({
+    id: `${FILENAMEENTITY}-${i+1}`,
+    href: `${FILENAMEENTITY}-${i+1}.xhtml`,
+    "media-type": "application/xhtml+xml",
+  })
+}
+// generate list of chapter xhtml to be inserted in opf-file
 const chapterCount = getChapterCount(epubPath);
 for (let i = 0; i < chapterCount; i++) {
   spineItemsExtra.push({
@@ -68,6 +86,8 @@ for (let i = 0; i < chapterCount; i++) {
     "media-type": "application/xhtml+xml",
   });
 }
+
+
 
 
 // decompressEpub(epubPath, extractedFolder);

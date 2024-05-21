@@ -19,10 +19,6 @@ module.exports = {
   plugins: [
     new CopyPlugin({
       patterns: [
-        // {
-        //   from: "templates/html/future-toc.xhtml",
-        //   to: "./",
-        // },
         { from: "templates/style/", to: "./" },
         { from: "templates/html/", to: "./"}
       ],

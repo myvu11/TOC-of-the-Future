@@ -26,3 +26,8 @@
   height: 100%;
   width: 100%;
 }
+
+a:active {
+  background-color: black;
+  color:white;
+}
