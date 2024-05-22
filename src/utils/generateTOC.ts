@@ -91,27 +91,28 @@ function generateHTMLFilesChapters(sourceFile: string, chapterPaths: string[]) {
   for (let i = 0; i < chapterPaths.length; i++) {
     const obj = parsed;
     // console.log("obj", obj)
-    // console.log("obj.0.html[1] -> ", obj['0'].html[0].head[2])
-    // console.log("obj.0.html[1] -> ", obj['0'].html[1].body[0])
-    // console.log("obj.0.html[1] -> ", obj['0'].html[1].body[0].h2[0][":@"])
-    // console.log("obj['0'].html[1].body -> ", obj['0'].html[1].body)
-    // console.log("obj['0'].html[1].body[0] -> ", obj['0'].html[1].body[0])
-    console.log("obj['0'].html[1].body[1] -> ", obj['0'].html[1].body[1])
-    console.log("obj['0'].html[1].body[1] -> ", obj['0'].html[1].body[1].div[1])
-    // console.log("obj['0'].html[1].body[2] -> ", obj['0'].html[1].body[2])
-    // console.log("obj.0.html[1] -> ", obj['0'].html[1].body[2].div[0].div[1][":@"]["@_id"])
-    // console.log("obj.0.html[1] -> ", obj['0'].html[1].body[0].div[1].h2[0][":@"])
+    // console.log("obj.0.html[1].body[0] -> ", obj['0'].html[1].body[0].div[2].div)
+    // console.log("obj.0.html[1].body[0] -> ", obj['0'].html[1].body[0].div[2].div[0])
+    // console.log("obj.0.html[1].body[0] -> ", obj['0'].html[1].body[0].div[2].div[0][":@"]["@_href"])
+    // console.log("obj.0.html[1].body[1] -> ", obj['0'].html[1].body[1])
+    // console.log("obj.0.html[1].body[1] -> ", obj['0'].html[1].body[1].div[0])
+    // console.log("obj.0.html[1].body[1] -> ", obj['0'].html[1].body[1].div[0].div[0][":@"]["@_href"])
+
 
     // preserveorder
     obj['0'].html[0].head[2].title[0]["#text"] = `Chapter ${i + 1}`;
-    obj['0'].html[1].body[0].h2[0][":@"]["@_href"] = chapterPaths[i].replace("OEBPS/", "")
-    obj['0'].html[1].body[0].h2[0]["a"][0]["#text"] = `Chapter ${i + 1}`
-    obj['0'].html[1].body[1].div[1][":@"]["@_href"] = `${CHAPTER}-${i+1}${ENDID}.xhtml`
+
+    obj['0'].html[1].body[0].div[1].h2[0][":@"]["@_href"] = chapterPaths[i].replace("OEBPS/", "")
+    obj['0'].html[1].body[0].div[1].h2[0]["a"][0]["#text"] = `Chapter ${i + 1}`
+    obj['0'].html[1].body[0].div[2].div[0][":@"]["@_href"] = chapterPaths[i].replace("OEBPS/", "")
+
+    obj['0'].html[1].body[1].div[0][":@"]["@_href"] = `${CHAPTER}-${i+1}${ENDID}.xhtml`
+    // obj['0'].html[1].body[1].div[0].div[0][":@"]["@_href"] = chapterPaths[i].replace("OEBPS/", "")
+
     obj['0'].html[1].body[2].div[0].div[0][":@"]["@_id"] = `future-toc-legend-ch-${i + 1}`;
     obj['0'].html[1].body[2].div[0].div[1][":@"]["@_id"] = `${CHAPTER}-${i + 1}`;
 
     const content = [{ "!DOCTYPE html": "" }, obj[0]];
-    // console.log("content", content)
 
     const builderOptions = {
       ignoreAttributes: false,
@@ -156,25 +157,23 @@ function generateHTMLFilesChaptersPart2(sourceFile: string, chapterPaths: string
   for (let i = 0; i < chapterPaths.length; i++) {
     const obj = parsed;
     // console.log("obj", obj)
-    // console.log("obj.0.html[1] -> ", obj['0'].html[0].head[2])
-    // console.log("obj.0.html[1] -> ", obj['0'].html[1].body[2].div[0])
-    // console.log("obj.0.html[1].bodu[2] -> ", obj['0'].html[1].body)
-    // console.log("obj.0.html[1] -> ", obj['0'].html[1].body[0].div[1].h2[0][":@"])
-    // console.log("obj.input", obj['0'].html[1].body[1])
-    // console.log("obj.body", obj['0'].html[1].body)
-    // console.log("obj.input", obj['0'].html[1].body[1].div[1])
+
 
     // preserveorder
     obj['0'].html[0].head[2].title[0]["#text"] = `Chapter ${i + 1}`;
-    obj['0'].html[1].body[0].h2[0][":@"]["@_href"] = chapterPaths[i].replace("OEBPS/", "")
-    obj['0'].html[1].body[0].h2[0]["a"][0]["#text"] = `Chapter ${i + 1}`
-    obj['0'].html[1].body[1].div[1][":@"]["@_href"] = `${CHAPTER}-${i+1}.xhtml`
-    obj['0'].html[1].body[1].div[1].a[1][":@"] = {...obj['0'].html[1].body[1].div[1].a[1][":@"], '@_checked': "true"}
+
+    obj['0'].html[1].body[0].div[1].h2[0][":@"]["@_href"] = chapterPaths[i].replace("OEBPS/", "")
+    obj['0'].html[1].body[0].div[1].h2[0]["a"][0]["#text"] = `Chapter ${i + 1}`
+    obj['0'].html[1].body[0].div[2].div[0][":@"]["@_href"] = chapterPaths[i].replace("OEBPS/", "")
+
+    obj['0'].html[1].body[1].div[0][":@"]["@_href"] = `${CHAPTER}-${i+1}.xhtml`
+    obj['0'].html[1].body[1].div[0].a[1][":@"] = {...obj['0'].html[1].body[1].div[0].a[1][":@"], '@_checked': "true"}
+    // obj['0'].html[1].body[1].div[0].div[0][":@"]["@_href"] = chapterPaths[i].replace("OEBPS/", "")
+
     obj['0'].html[1].body[2].div[0].div[0][":@"]["@_id"] = `future-toc-legend-ch-${i + 1}${ENDID}`;
     obj['0'].html[1].body[2].div[0].div[1][":@"]["@_id"] = `${CHAPTER}-${i + 1}${ENDID}`;
 
     const content = [{ "!DOCTYPE html": "" }, obj[0]];
-    console.log("content", content)
 
     const builderOptions = {
       ignoreAttributes: false,

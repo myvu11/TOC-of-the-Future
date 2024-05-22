@@ -295,14 +295,7 @@ export function buildStackedBarChart(
         .attr("text-decoration", "underline")
     );
 
-  // append right axis line to mark end of bar
-  svg
-    .append("g")
-    .attr("transform", `translate(${width - marginRight * 4.25},${0})`)
-    .call(d3.axisRight(yScale).tickSize(0))
-    .style("font", "0px times");
-
-  // append x axis for sentence count
+    // append x axis for sentence count
   svg
     .append("g")
     .attr("transform", `translate(${0},${height})`)
@@ -327,4 +320,11 @@ export function buildStackedBarChart(
     .attr("text-anchor", "end")
     .text("Sentences")
     .style("font", "16px times");
+
+  // append right axis line to mark end of bar
+  // svg
+  //   .append("g")
+  //   .attr("transform", `translate(${width - marginRight * 4.25},${0})`)
+  //   .call(d3.axisRight(yScale).tickSize(0))
+  //   .style("font", "0px times");
 }
