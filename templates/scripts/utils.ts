@@ -35,7 +35,7 @@ const colorNomentions = "#bdbdbd" //"#d9d9d9"; //"#045a8d";
 
 // make color scale
 export function getLegendColors(keys:string[]) {
-    const entityCount = Math.min(numberOfMains, keys.length - 2)
+    const entityCount = Math.min(numberOfMains, (keys.length - 2) < 0 ? 0 : (keys.length - 2))
     const colorScheme = [...qualColorsPaired].reverse().splice(0, entityCount);
     const color = d3
         .scaleOrdinal<string>([...colorScheme, colorSecondary, colorNomentions])
@@ -46,7 +46,7 @@ export function getLegendColors(keys:string[]) {
 
 // get top n characters of the book
 export function getTops(data: ChapterOccurence[], n=numberOfMains) {
-    let countOccurence: Record<string, string | number>[] = [];
+    let countOccurence: { name: string, count: number }[] = [];
     for (let i = 0; i < data.length; i++) {
       for (let j = 0; j < data[i].characters.length; j++) {
         const character: string = data[i].characters[j].name;
@@ -73,7 +73,45 @@ export function getTops(data: ChapterOccurence[], n=numberOfMains) {
       return keys.slice(0, n);
     }
     return keys;
+}
+
+function getChapterOccurenceCount(data: ChapterOccurence) {
+  let countOccurence: { name: string, count: number }[] = [];
+  for (let i = 0; i < data.characters.length; i++) {
+    const character: string = data.characters[i].name;
+    const index = countOccurence.findIndex((e) => e.name === character);
+    const occurenceLength = data.characters[i].occurence.length;
+    if (index !== -1) {
+      const prevCount = Number(countOccurence[index].count);
+      const newCount = prevCount + occurenceLength;
+      countOccurence[index] = { name: character, count: newCount };
+    } else {
+      countOccurence.push({ name: character, count: occurenceLength });
+    }
   }
+  return countOccurence;
+}
+
+function getTopEntities(countOccurence: { name: string, count: number }[]) {
+  const res = Object(countOccurence).sort(
+    (a: Record<string, string | number>, b: Record<string, string | number>) =>
+      Number(b.count) - Number(a.count)
+  );
+
+  const keys: string[] = res.map((e: Record<string, string | number>) =>
+    String(e.name)
+  );
+  if (keys.length > numberOfMains) {
+    return keys.slice(0, numberOfMains);
+  }
+  return keys;
+}
+
+export function getChapterTops(data: ChapterOccurence) {
+  const chapterCountOccurence = getChapterOccurenceCount(data);
+  const tops = getTopEntities(chapterCountOccurence);
+  return tops;
+}
 
 export const groupBy = <T, R extends string | number>(
   arr: T[],

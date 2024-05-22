@@ -5,12 +5,8 @@ h2 {
 a {
   color: black;
 }
-a:active {
-  background-color: black;
-  color:white;
-}
 
-svg > a {
+a:active {
   background-color: black;
   color:white;
 }
@@ -21,7 +17,34 @@ svg > a {
   /* grid-auto-rows: 8.5rem;       \\ for instance chart TOC */
   grid-auto-rows: 32rem;
   page-break-after: always;
-  text-align: center;
+  /* text-align: center; */
+}
+
+.previous {
+  /* background-color: #ddd; */
+  color: black;
+  /* padding-left: 20px; */
+  text-decoration: none;
+  position: relative;
+  padding-left: 25px;
+  /* display: inline-block; */
+  /* padding: 2px 4px; */
+}
+.previous img {
+  height: 25px;
+  width:25px;
+  position: absolute;
+  top: 0;
+}
+
+.title-header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding-left: 20px;
+  padding-right: 20px;
+  margin-top: 20px;
 }
 
 .toc-item {
@@ -32,6 +55,72 @@ svg > a {
   margin-bottom: 0.5rem;
   position: relative;
 }
+
+.toggle-container {
+  text-decoration: none;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.toggle-header {
+  text-align: center;
+  font-size: 12px;
+  /* margin: 0; */
+}
+
+.toggleContainer {
+   position: relative;
+   display: grid;
+   grid-template-columns: repeat(2, 1fr);
+   /* height: 15px; */
+   width: fit-content;
+   border: 1px solid grey; /*#343434*/
+   border-radius: 20px;
+   background: grey;
+   /* font-weight: bold; */
+   color: #343434;
+   cursor: pointer;
+   text-align: center;
+ }
+ .toggleContainer::before {
+   content: '';
+   position: absolute;
+   width: 50%;
+   height: 100%;
+   left: 0%;
+   border-radius:20px;
+   background: white;
+   transition: all 0.3s;
+ }
+ .toggleCheckbox:checked + .toggleContainer::before {
+    left: 50%;
+ }
+ .toggleContainer div {
+   padding: 2px;
+   text-align: center;
+   z-index: 1;
+   font-size: 10px;
+ }
+ .toggleCheckbox {
+   display: none;
+ }
+ .toggleCheckbox:checked + .toggleContainer div:first-child{
+   color: white;
+   transition: color 0.3s;
+ }
+ .toggleCheckbox:checked + .toggleContainer div:last-child{
+   color: #343434;
+   transition: color 0.3s;
+ }
+ .toggleCheckbox + .toggleContainer div:first-child{
+   color: #343434;
+   transition: color 0.3s;
+ }
+ .toggleCheckbox + .toggleContainer div:last-child{
+   color: white;
+   transition: color 0.3s;
+ }
 
 .chapter-title {
   position: absolute;

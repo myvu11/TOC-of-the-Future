@@ -8,6 +8,8 @@ import { getTops, OTHERS, DESCRIPTIONS } from "../../templates/scripts/utils.js"
 
 const NAMEID = "future-toc-entity-";
 const LEGENDID = "future-toc-entity-legend-";
+const CHAPTER = "future-toc-chapter";
+const ENDID = "-1";
 
 interface ChapterOccurence {
   chapterTitle: string;
@@ -74,50 +76,132 @@ function copyTemplates() {
 
 function generateHTMLFilesChapters(sourceFile: string, chapterPaths: string[]) {
   const xmlData = fs.readFileSync(sourceFile, "utf-8");
-  const options = {
+
+  const parsingOptions = {
     ignoreAttributes: false,
-    preserveOrder: false,
-    format: true,
-    suppressEmptyNode: false,
-    attrValueProcessor: true,
+    preserveOrder: true,
+    unpairedTags: ["hr", "br", "link", "meta"],
+    stopNodes : [ "*.pre", "*.script"],
+    processEntities: true,
+    htmlEntities: true
   };
-  const parser = new XMLParser(options);
+  const parser = new XMLParser(parsingOptions);
   const parsed = parser.parse(xmlData);
 
   for (let i = 0; i < chapterPaths.length; i++) {
-    const obj = {...parsed};
-    console.log("obj", obj.html.body.h2.a)
-    obj.html.head.title = `Chapter ${i + 1}`;
-    obj.html.body.h2.a["@_href"] = chapterPaths[i].replace("OEBPS/", "")
-    obj.html.body.h2.a["#text"] = `Chapter ${i + 1}`
-    const div = obj.html.body.div.div.div;
-    console.log("obj after", obj.html.body.h2.a)
+    const obj = parsed;
+    // console.log("obj", obj)
+    // console.log("obj.0.html[1] -> ", obj['0'].html[0].head[2])
+    // console.log("obj.0.html[1] -> ", obj['0'].html[1].body[0])
+    // console.log("obj.0.html[1] -> ", obj['0'].html[1].body[0].h2[0][":@"])
+    // console.log("obj['0'].html[1].body -> ", obj['0'].html[1].body)
+    // console.log("obj['0'].html[1].body[0] -> ", obj['0'].html[1].body[0])
+    console.log("obj['0'].html[1].body[1] -> ", obj['0'].html[1].body[1])
+    console.log("obj['0'].html[1].body[1] -> ", obj['0'].html[1].body[1].div[1])
+    // console.log("obj['0'].html[1].body[2] -> ", obj['0'].html[1].body[2])
+    // console.log("obj.0.html[1] -> ", obj['0'].html[1].body[2].div[0].div[1][":@"]["@_id"])
+    // console.log("obj.0.html[1] -> ", obj['0'].html[1].body[0].div[1].h2[0][":@"])
 
-    for (let j = 0; j < div.length; j++) {
-      const element = div[j]["@_id"];
-      console.log("element", element);
-      if (element.startsWith(`future-toc-legend-ch-`)) {
-        obj.html.body.div.div.div[j]["@_id"] = `future-toc-legend-ch-${i + 1}`;
-      }
-      if (element.startsWith(`future-toc-chapter-`)) {
-        obj.html.body.div.div.div[j]["@_id"] = `future-toc-chapter-${i + 1}`;
-      }
+    // preserveorder
+    obj['0'].html[0].head[2].title[0]["#text"] = `Chapter ${i + 1}`;
+    obj['0'].html[1].body[0].h2[0][":@"]["@_href"] = chapterPaths[i].replace("OEBPS/", "")
+    obj['0'].html[1].body[0].h2[0]["a"][0]["#text"] = `Chapter ${i + 1}`
+    obj['0'].html[1].body[1].div[1][":@"]["@_href"] = `${CHAPTER}-${i+1}${ENDID}.xhtml`
+    obj['0'].html[1].body[2].div[0].div[0][":@"]["@_id"] = `future-toc-legend-ch-${i + 1}`;
+    obj['0'].html[1].body[2].div[0].div[1][":@"]["@_id"] = `${CHAPTER}-${i + 1}`;
+
+    const content = [{ "!DOCTYPE html": "" }, obj[0]];
+    // console.log("content", content)
+
+    const builderOptions = {
+      ignoreAttributes: false,
+      format: true,
+      preserveOrder: true,
+      // suppressEmptyNode: true,
+      // unpairedTags: ["hr", "br", "link", "meta"],
+      stopNodes : [ "*.pre", "*.script"],
     }
 
-    const content = Object.assign({ "!DOCTYPE html": "" }, obj);
-    const builder = new XMLBuilder(options);
+    const builder = new XMLBuilder(builderOptions);
     const xmlContent = builder
       .build(content)
       .replace("</!DOCTYPE html>", "")
       .replace("></link>", "/>")
-      .replace("></link>", "/>");
+      .replace("></link>", "/>")
+      .replace("></input>", "/>")
+      .replace("></img>", "/>");
 
+    // console.log("xmlContent", xmlContent)
     fs.writeFileSync(
-      `templates/html/future-toc-chapter-${i + 1}.xhtml`,
+      `templates/html/${CHAPTER}-${i + 1}.xhtml`,
       xmlContent
     );
   }
 }
+
+function generateHTMLFilesChaptersPart2(sourceFile: string, chapterPaths: string[]) {
+  const xmlData = fs.readFileSync(sourceFile, "utf-8");
+  console.log("xml read")
+  const parsingOptions = {
+    ignoreAttributes: false,
+    preserveOrder: true,
+    unpairedTags: ["hr", "br", "link", "meta"],
+    stopNodes : [ "*.pre", "*.script"],
+    processEntities: true,
+    htmlEntities: true
+  };
+  const parser = new XMLParser(parsingOptions);
+  const parsed = parser.parse(xmlData);
+
+  for (let i = 0; i < chapterPaths.length; i++) {
+    const obj = parsed;
+    // console.log("obj", obj)
+    // console.log("obj.0.html[1] -> ", obj['0'].html[0].head[2])
+    // console.log("obj.0.html[1] -> ", obj['0'].html[1].body[2].div[0])
+    // console.log("obj.0.html[1].bodu[2] -> ", obj['0'].html[1].body)
+    // console.log("obj.0.html[1] -> ", obj['0'].html[1].body[0].div[1].h2[0][":@"])
+    // console.log("obj.input", obj['0'].html[1].body[1])
+    // console.log("obj.body", obj['0'].html[1].body)
+    // console.log("obj.input", obj['0'].html[1].body[1].div[1])
+
+    // preserveorder
+    obj['0'].html[0].head[2].title[0]["#text"] = `Chapter ${i + 1}`;
+    obj['0'].html[1].body[0].h2[0][":@"]["@_href"] = chapterPaths[i].replace("OEBPS/", "")
+    obj['0'].html[1].body[0].h2[0]["a"][0]["#text"] = `Chapter ${i + 1}`
+    obj['0'].html[1].body[1].div[1][":@"]["@_href"] = `${CHAPTER}-${i+1}.xhtml`
+    obj['0'].html[1].body[1].div[1].a[1][":@"] = {...obj['0'].html[1].body[1].div[1].a[1][":@"], '@_checked': "true"}
+    obj['0'].html[1].body[2].div[0].div[0][":@"]["@_id"] = `future-toc-legend-ch-${i + 1}${ENDID}`;
+    obj['0'].html[1].body[2].div[0].div[1][":@"]["@_id"] = `${CHAPTER}-${i + 1}${ENDID}`;
+
+    const content = [{ "!DOCTYPE html": "" }, obj[0]];
+    console.log("content", content)
+
+    const builderOptions = {
+      ignoreAttributes: false,
+      format: true,
+      preserveOrder: true,
+      // suppressEmptyNode: true,
+      // unpairedTags: ["hr", "br", "link", "meta"],
+      stopNodes : [ "*.pre", "*.script"],
+    }
+
+    const builder = new XMLBuilder(builderOptions);
+    const xmlContent = builder
+      .build(content)
+      .replace("</!DOCTYPE html>", "")
+      .replace("></link>", "/>")
+      .replace("></link>", "/>")
+      .replace("></input>", "/>")
+      .replace("></img>", "/>");
+
+    // console.log("xmlContent", xmlContent)
+    fs.writeFileSync(
+      `templates/html/${CHAPTER}-${i + 1}-1.xhtml`,
+      xmlContent
+    );
+  }
+}
+
 
 function generateHTMLFilesOverview(sourceFile: string) {
   const xmlData = fs.readFileSync(sourceFile, "utf-8");
@@ -162,16 +246,17 @@ function generateHTMLFilesOverview(sourceFile: string) {
 }
 
 export function generateTOC(epubPath: string) {
-  // const chapterCount = getChapterCount(epubPath);
-  // const chapterPaths = getChapterFilePaths(epubPath);
-  // console.log("paths", chapterPaths)
-  // insertChapterCount(chapterCount);
+  const chapterPaths = getChapterFilePaths(epubPath);
   // getReadingTimeFromChapters(epubPath, extractedFolder);
   // insertHead(epubPath, "generated-toc/toc.xhtml")
 
-  // generateHTMLFilesChapters(
-  //   "templates/html/future-toc-chapter-base.xhtml",
-  //   chapterPaths
-  // );
-  generateHTMLFilesOverview("templates/html/future-toc.xhtml")
+  generateHTMLFilesChapters(
+    "templates/html/future-toc-chapter-base.xhtml",
+    chapterPaths
+  );
+
+  generateHTMLFilesChaptersPart2("templates/html/future-toc-chapter-base.xhtml",
+  chapterPaths);
+
+  // generateHTMLFilesOverview("templates/html/future-toc.xhtml")
 }

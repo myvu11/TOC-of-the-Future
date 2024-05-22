@@ -138,9 +138,11 @@ export function buildStackedBarChart(
   data: ChapterOccurence[],
   topCharacters: string[],
   stackOrder: string[],
-  ID: number,
+  ID: number
   // onCharacterClick: (i: number) => void
 ) {
+  if (!document.getElementById(`${NAMEID}-${ID}`)) return;
+
   const groups = getChapterTitles(data);
   const entities = [...topCharacters, OTHERS, DESCRIPTIONS];
   const chartData = formatToStackData(data, topCharacters);
@@ -173,8 +175,9 @@ export function buildStackedBarChart(
   // console.log("stackedData", stackedData);
 
   // Compute the height from the number of stacks.
-  const height = stackedData[0].length * (barHeight*2 + barGap);
-  const clientWidth = document.getElementById(`${NAMEID}-${ID}`)?.clientWidth ?? 450;
+  const height = stackedData[0].length * (barHeight * 2 + barGap);
+  const clientWidth =
+    document.getElementById(`${NAMEID}-${ID}`)?.clientWidth ?? 450;
   // const width = clientWidth < 457 ? clientWidth : 457;
   const width = clientWidth;
   const viewBoxDim = {
@@ -183,7 +186,6 @@ export function buildStackedBarChart(
     width: width,
     height: height,
   };
-
 
   // Prepare the scales for positional and color encodings.
   const xScale = d3
@@ -198,14 +200,14 @@ export function buildStackedBarChart(
     .padding(0.08);
 
   const color = getLegendColors(entities);
-  document
+  document;
   const legendsDiv = document.getElementsByClassName("legends");
   // console.log("legendsDiv", legendsDiv)
   Array.from(legendsDiv).forEach((legends) => {
     stackOrder.forEach((key) => {
       const div = document.createElement("div");
       div.classList.add("legend");
-      const index = entities.indexOf(key)+1;
+      const index = entities.indexOf(key) + 1;
       div.innerHTML = `<a href='${NAMEID}-${index}.xhtml'><div>${key}</div></a><div class='color' style='background: ${color(
         key
       )}'></div>`;
@@ -217,8 +219,8 @@ export function buildStackedBarChart(
 
       // }
       if (legends.id === `${LEGENDID}-${ID}`) {
-          legends?.append(div);
-        }
+        legends?.append(div);
+      }
     });
   });
 

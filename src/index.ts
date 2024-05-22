@@ -15,6 +15,7 @@ import chaptersOccurences from "../templates/chapterInstances/steinbeck.json" as
 
 const FILENAMEENTITY = "future-toc-entity";
 const FILENAMECHAPTER = "future-toc-echapter";
+const ENDID = "-1";
 
 // const epubPath = "./epub-files/okakura-book-of-tea.epub";
 // const epubPath = "./epub-files/Alice's Adventure in Wonderland by Lewis Carroll - Project Gutenberg.epub";
@@ -83,6 +84,18 @@ for (let i = 0; i < chapterCount; i++) {
   manifestItems.push({
     id: `future-toc-chapter-${i + 1}`,
     href: `future-toc-chapter-${i + 1}.xhtml`,
+    "media-type": "application/xhtml+xml",
+  });
+}
+
+for (let i = 0; i < chapterCount; i++) {
+  spineItemsExtra.push({
+    idref: `future-toc-chapter-${i + 1}${ENDID}`,
+    linear: "no",
+  });
+  manifestItems.push({
+    id: `future-toc-chapter-${i + 1}${ENDID}`,
+    href: `future-toc-chapter-${i + 1}${ENDID}.xhtml`,
     "media-type": "application/xhtml+xml",
   });
 }

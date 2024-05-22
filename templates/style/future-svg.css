@@ -13,6 +13,11 @@
   flex: 1;
 
 }
+
+.svg-container a:active {
+  background-color: black;
+  color:white;
+}
 .svg-content {
   /* display: inline-block; */
   position: absolute;

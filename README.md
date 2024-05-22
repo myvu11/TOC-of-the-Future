@@ -1,1 +1,4 @@
-must have api key to chat gpt
+# Introduction
+
+# Setup
+Make an .env file to store an api key to OpenAI API.

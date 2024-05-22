@@ -20,7 +20,8 @@ module.exports = {
     new CopyPlugin({
       patterns: [
         { from: "templates/style/", to: "./" },
-        { from: "templates/html/", to: "./"}
+        { from: "templates/html/", to: "./"},
+        { from: "templates/img/", to: "./"}
       ],
     }),
   ],

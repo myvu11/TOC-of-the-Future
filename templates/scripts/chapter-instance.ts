@@ -1,7 +1,6 @@
 import * as d3 from "d3";
 import { getLegendColors, groupBy } from "./utils";
 
-
 const CHAPTER = "future-toc-chapter";
 const marginTop = 15;
 const marginRight = 20;
@@ -83,21 +82,25 @@ const debug = (label: string) => {
 // build the chapterInstance
 export function buildChapterInstance(
   data: ChapterSections,
-  ID: number,
-  paths: string[],
+  ID: string,
   entities: string[]
 ) {
+  if (!document.getElementById(`${CHAPTER}-${ID}`)) return;
+
   const counts = countMentionings(data);
   const maxEntities = Math.max(...counts);
   const sections: string[] = data.sectionTitles.map(
     (title) => "Section " + title.sectionID.toString()
   );
 
-  const occurence: Record<string, string | number>[] = data.sectionOccurence;
+  const occurence: {
+    sectionID: number;
+    name: string;
+    index: number;
+  }[] = data.sectionOccurence;
+
   const commonData = detectCommonInstances(data);
   const maxLength = getMaxSectionLength(occurence);
-  // console.log("data instance", data)
-  // console.log("commonData", commonData)
 
   // dimensions of svg
   const height = data.sectionTitles.length * (barHeight + barGap);
@@ -124,7 +127,6 @@ export function buildChapterInstance(
     .domain(sections)
     .range([0, height])
     .padding(0.08);
-
 
   const color = getLegendColors(entities);
 
@@ -176,7 +178,7 @@ export function buildChapterInstance(
   svg
     .append("g")
     .style("font", "16px times")
-    .attr("transform", `translate(${0},${marginTop+10})`)
+    .attr("transform", `translate(${0},${marginTop + 10})`)
     .call(d3.axisLeft(yScale).tickSize(0))
     .selectAll("g")
     .each(function (_, i) {
@@ -184,15 +186,15 @@ export function buildChapterInstance(
       d3.select(el.parentNode)
         .insert("svg:a")
         // .style("cursor", "pointer")
-        // .attr("xlink:href", paths[i])
         .append(() => el);
     })
-    .call((g) =>
-      g
-        .selectAll(".tick text")
-        .attr("x", -15)
-        .attr("y", -barHeight/5)
-        // .attr("text-decoration", "underline")
+    .call(
+      (g) =>
+        g
+          .selectAll(".tick text")
+          .attr("x", -15)
+          .attr("y", -barHeight / 5)
+      // .attr("text-decoration", "underline")
     );
 
   // append vertical right axis line to mark end of bar

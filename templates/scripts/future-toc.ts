@@ -4,7 +4,7 @@ import { buildChapterInstance } from "./chapter-instance";
 import * as chaptersOccurences from "../chapterInstances/steinbeck.json";
 import * as chapterPaths from "../chapterInstances/chapterPaths.json";
 import * as bookOccurence from "../chapterInstances/BookOccurence.json";
-import { getTops, OTHERS, DESCRIPTIONS } from "./utils";
+import { getTops, OTHERS, DESCRIPTIONS, getChapterTops } from "./utils";
 
 type ChapterSections = {
   sectionTitles: { sectionID: string; sectionTitle: string }[];
@@ -65,5 +65,11 @@ for (let i = 0; i < entities.length; i++) {
 }
 
 for (let i = 0; i < bookData.length; i++) {
-  buildChapterInstance(bookData[i].occurenceSet[0], i + 1, paths, entities);
+  buildChapterInstance(bookData[i].occurenceSet[0], `${i+1}`, entities);
+}
+
+for (let i = 0; i < bookData.length; i++) {
+  const chapterTops = getChapterTops(occurences[i]);
+  const chapterEntities = [...chapterTops, OTHERS, DESCRIPTIONS]
+  buildChapterInstance(bookData[i].occurenceSet[0], `${i+1}-1`, chapterEntities);
 }
