@@ -9,7 +9,8 @@ templates/deprecated
 templates/html
 templates/chapterInstances
 src/utils/gpt-character-occurence-sentence.ts
-src/utils/gpt-non-fiction-concepts-ts
+src/utils/gpt-non-fiction-concepts.ts
+src/utils/prompts/get-character-occurences.txt
 
 
 # don't ignore these
