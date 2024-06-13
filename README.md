@@ -21,11 +21,11 @@ OPENAI_API_KEY=" "
 Create the following folders in the main folder: *compressed*,  *extracted*, and *epub-files*. \
 Insert the input EPUB file in the just created folder *epub-files*.
 
-Go to the file *src/generate-toc.ts* and modify the following constants keeping the folder name:
+Go to the file *src/generate-toc.ts* and modify the following constants filename, keeping the folder name. The *epubPath* is the path to your stored epub file. The *extractedFolder* is the folder name you want the unzipped EPUB to be stored. Foldername is of your choice.
 ```code
-const epubPath = ".epub-files/ "
-const extractedFolder = ".extracted/"
-const folderName = " "
+export const epubPath = "./epub-files/steinbeck-of-mice-and-men - Epubbooks.epub";
+export const extractedFolder = "./extracted/steinbeck - epubbooks";
+export const folderName = "steinbeck/";
 ```
 
 Run in the terminal
