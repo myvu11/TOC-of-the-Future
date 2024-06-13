@@ -2,7 +2,7 @@ import { copyFilesToFolder, getFileContent } from "./zipping.js";
 import { getChapterCount, getChapterFilePaths } from "./chapterHandling.js";
 import fs from "node:fs";
 import { XMLParser, XMLBuilder } from "fast-xml-parser";
-import chaptersOccurences from "../../templates/chapterInstances/steinbeck.json" assert { type: "json" };
+import chaptersOccurences from "../../templates/chapterInstances/stackedData.json" assert { type: "json" };
 import { getTops, OTHERS, DESCRIPTIONS } from "../../templates/scripts/utils.js"
 
 
@@ -41,37 +41,15 @@ function insertHead(epubPath: string, destination: string) {
 
   const parser = new XMLParser(options);
   const obj = parser.parse(xmlData);
-  // console.log("obj", obj)
   const head = obj.html.head;
-  // console.log("html", head)
 
   const destData = fs.readFileSync(destination);
   const destObj = parser.parse(destData);
-  console.log("dest", destObj);
   destObj.html["head"] = head;
-  // console.log("after splice", destObj)
 
   const builder = new XMLBuilder(options);
   const xmlContent = builder.build(destObj);
   fs.writeFileSync(destination, xmlContent);
-}
-
-function copyTemplates() {
-  copyFilesToFolder(
-    "templates/html/future-toc.xhtml",
-    "generated-toc",
-    "future-toc.xhtml"
-  );
-  copyFilesToFolder(
-    "templates/scripts/future-toc.ts",
-    "generated-toc",
-    "future-toc.ts"
-  );
-  copyFilesToFolder(
-    "templates/style/future-toc.css",
-    "generated-toc/style",
-    "future-toc.css"
-  );
 }
 
 function generateHTMLFilesChapters(sourceFile: string, chapterPaths: string[]) {
@@ -91,13 +69,6 @@ function generateHTMLFilesChapters(sourceFile: string, chapterPaths: string[]) {
   for (let i = 0; i < chapterPaths.length; i++) {
     const obj = parsed;
     // console.log("obj", obj)
-    // console.log("obj.0.html[1].body[0] -> ", obj['0'].html[1].body[0].div[2].div)
-    // console.log("obj.0.html[1].body[0] -> ", obj['0'].html[1].body[0].div[2].div[0])
-    // console.log("obj.0.html[1].body[0] -> ", obj['0'].html[1].body[0].div[2].div[0][":@"]["@_href"])
-    // console.log("obj.0.html[1].body[1] -> ", obj['0'].html[1].body[1])
-    // console.log("obj.0.html[1].body[1] -> ", obj['0'].html[1].body[1].div[0])
-    // console.log("obj.0.html[1].body[1] -> ", obj['0'].html[1].body[1].div[0].div[0][":@"]["@_href"])
-
 
     // preserveorder
     obj['0'].html[0].head[2].title[0]["#text"] = `Chapter ${i + 1}`;
@@ -142,7 +113,7 @@ function generateHTMLFilesChapters(sourceFile: string, chapterPaths: string[]) {
 
 function generateHTMLFilesChaptersPart2(sourceFile: string, chapterPaths: string[]) {
   const xmlData = fs.readFileSync(sourceFile, "utf-8");
-  console.log("xml read")
+  // console.log("xml read")
   const parsingOptions = {
     ignoreAttributes: false,
     preserveOrder: true,
@@ -157,8 +128,6 @@ function generateHTMLFilesChaptersPart2(sourceFile: string, chapterPaths: string
   for (let i = 0; i < chapterPaths.length; i++) {
     const obj = parsed;
     // console.log("obj", obj)
-
-
     // preserveorder
     obj['0'].html[0].head[2].title[0]["#text"] = `Chapter ${i + 1}`;
 
@@ -246,8 +215,6 @@ function generateHTMLFilesOverview(sourceFile: string) {
 
 export function generateTOC(epubPath: string) {
   const chapterPaths = getChapterFilePaths(epubPath);
-  // getReadingTimeFromChapters(epubPath, extractedFolder);
-  // insertHead(epubPath, "generated-toc/toc.xhtml")
 
   generateHTMLFilesChapters(
     "templates/html/future-toc-chapter-base.xhtml",
@@ -257,5 +224,5 @@ export function generateTOC(epubPath: string) {
   generateHTMLFilesChaptersPart2("templates/html/future-toc-chapter-base.xhtml",
   chapterPaths);
 
-  // generateHTMLFilesOverview("templates/html/future-toc.xhtml")
+  generateHTMLFilesOverview("templates/html/future-toc.xhtml")
 }

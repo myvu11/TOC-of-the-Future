@@ -43,7 +43,6 @@ function saveChapterSectionTitles(folderName:string) {
           }
           const sections: Record<string, string|number> = Object(response);
           chapterSections.push({[`chapter ${i+1}`]: fileName, ...sections});
-          console.log("chapterSeciton", chapterSections)
         })
         .catch((err) => console.log(err.code));
     }
@@ -81,14 +80,13 @@ function saveChapterSectionTitles(folderName:string) {
       for(let j = 0; j < textSections.length; j++) {
         sections[j].text = textSections[j]
       }
-      // console.log("sections", sections)
       sectioning.push({
         title: `chapter ${i+1}`,
         sections
       })
     }
     const sectioningJSON = JSON.stringify(sectioning)
-    fs.writeFileSync("src/steinbeck/chapter-sections.json", sectioningJSON)
+    fs.writeFileSync("src/" + folderName + "chapter-sections.json", sectioningJSON)
   }
 
   function getChapterSectionOccurence(folderName: string, targetFolder: string) {
@@ -148,7 +146,7 @@ function saveChapterSectionTitles(folderName:string) {
   }
 
   export function sectionHandler(folderName:string) {
-    // saveChapterSectionTitles(folderName)
-    // chapterToSections(folderName)
+    saveChapterSectionTitles(folderName)
+    chapterToSections(folderName)
     getChapterSectionOccurence(folderName, "templates/chapterInstances/")
   }

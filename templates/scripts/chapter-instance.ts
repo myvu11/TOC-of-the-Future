@@ -9,8 +9,6 @@ const marginLeft = 90;
 const barHeight = 25;
 const barGap = 10;
 
-// const OTHERS = "secondary";
-// const DESCRIPTIONS = "no mentionings";
 
 type ChapterSections = {
   sectionTitles: { sectionID: string; sectionTitle: string }[];
@@ -220,11 +218,4 @@ export function buildChapterInstance(
     .attr("text-anchor", "end")
     .text("Sentences")
     .style("font", "16px times");
-
-  // append vertical right axis line to mark end of bar
-  // svg
-  //   .append("g")
-  //   .attr("transform", `translate(${width - marginRight * 4.25},${marginTop})`)
-  //   .call(d3.axisRight(yScale).tickSize(0))
-  //   .style("font", "0px times");
 }

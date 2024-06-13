@@ -37,12 +37,9 @@ function getTextFromXHTML(html: string) {
   }
 
   const firstChild = parsed?.firstChild?.innerText ?? "";
-  // console.log("FIRST:", firstChild);
   const content = parsed?.structuredText;
   const text = content.replace(firstChild, " ");
-  // const innerText = parsed?.innerText;
-  // console.log("innerText", innerText)
-  // console.log("content", content)
+
   return text;
 }
 
@@ -107,7 +104,7 @@ export function getReadingTimeChapters(
 // save chapters in text file
 function saveChaptersToFile(epubPath: string, extractedFolder: string, folderName:string) {
   const chapters = extractChapterText(epubPath, extractedFolder);
-  console.log("chapters", chapters.length);
+
   for (let i = 0; i < chapters.length; i++) {
     const fileName = chapters[i]["title"]
       .replace("OEBPS/", "")
@@ -159,7 +156,6 @@ function indexNoMentions(text: string[], characters: Record<string, string>[]) {
   const instances: number[] = [];
   for (let i = 0; i < text.length; i++) {
     const mentions = characters.map(character =>
-      // console.log("name", character.name)
       !(text[i].includes(character.name)) && !(text[i].includes(character.name.toLowerCase()))
     )
 
@@ -173,17 +169,17 @@ function indexNoMentions(text: string[], characters: Record<string, string>[]) {
 
 // get the occurences of characters
 function getOccurences(folderName:string) {
-  const chapterList = fs.readdirSync("./src/" + folderName + "/chapters");
-  const entityList = fs.readdirSync("./src/" + folderName + "/named-entities");
+  const chapterList = fs.readdirSync("./src/" + folderName + "chapters");
+  const entityList = fs.readdirSync("./src/" + folderName + "named-entities");
   const chaptersOccurences: Record<
     string,
     Record<string, string | number[]>[] | string | number | number[]
   >[] = [];
   for (let i = 0; i < chapterList.length; i++) {
-    const str = fs.readFileSync("./src/" + folderName + "/chapters/" + chapterList[i], "utf-8");
+    const str = fs.readFileSync("./src/" + folderName + "chapters/" + chapterList[i], "utf-8");
     const text = strToSentence(str);
     const nameStr = fs.readFileSync(
-      "./src/" + folderName + "/named-entities/" + entityList[i],
+      "./src/" + folderName + "named-entities/" + entityList[i],
       "utf-8"
     );
     const names = JSON.parse(nameStr);
@@ -213,8 +209,8 @@ function getOccurences(folderName:string) {
 }
 
 // save occurences in each chapter to file
-function saveBookOccurences(target:string) {
-  const chaptersOccurences = getOccurences("steinbeck");
+function saveBookOccurences(target:string, folderName:string) {
+  const chaptersOccurences = getOccurences(folderName);
   const occurenceJSON = JSON.stringify(chaptersOccurences);
   fs.writeFileSync(target, occurenceJSON);
 }
@@ -228,10 +224,9 @@ function saveChapterPaths(epubPath:string, target:string) {
 
 
 
-export function chapterHandler(epubPath:string, extractedFolder:string) {
-  // saveChaptersToFile(epubPath, extractedFolder, "steinbeck/chapters/")
-  // saveCharactersToFile("steinbeck/")
-  // console.log(getChapterFilePaths(epubPath));
-  // saveChapterPaths(epubPath, "templates/chapterInstances/chapterPaths.json")
-  // saveBookOccurences("templates/chapterInstances/stackedData.json");
+export function chapterHandler(epubPath:string, extractedFolder:string, folderName:string) {
+  saveChaptersToFile(epubPath, extractedFolder, folderName + "chapters/")
+  saveCharactersToFile(folderName)
+  saveChapterPaths(epubPath, "templates/chapterInstances/chapterPaths.json")
+  saveBookOccurences("templates/chapterInstances/stackedData.json", folderName);
 }

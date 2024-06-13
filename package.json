@@ -5,7 +5,8 @@
   "main": "src/index.js",
   "type": "module",
   "scripts": {
-    "start": "npm run build && node --loader ts-node/esm src/index.ts",
+    "generate-toc": "node --loader ts-node/esm src/generate-toc.ts",
+    "start": "npm run generate-toc && npm run build && node --loader ts-node/esm src/index.ts",
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "webpack serve",
     "build": "webpack build"

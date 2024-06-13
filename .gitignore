@@ -1,5 +1,17 @@
 compressed/
+dist/
 epub-files/
 .env
 extracted/
 node_modules/
+src/steinbeck/
+templates/deprecated
+templates/html
+templates/chapterInstances
+src/utils/gpt-character-occurence-sentence.ts
+src/utils/gpt-non-fiction-concepts-ts
+
+
+# don't ignore these
+!templates/html/future-toc.xhtml
+!templates/html/future-chapter-base.xhtml

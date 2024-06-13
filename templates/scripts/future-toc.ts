@@ -1,8 +1,6 @@
-import { buildInstanceChart } from "../deprecated/instancechart";
 import { buildStackedBarChart } from "./stackedBarChart";
 import { buildChapterInstance } from "./chapter-instance";
-import * as chaptersOccurences from "../chapterInstances/steinbeck.json";
-import * as chapterPaths from "../chapterInstances/chapterPaths.json";
+import * as chaptersOccurences from "../chapterInstances/stackedData.json";
 import * as bookOccurence from "../chapterInstances/BookOccurence.json";
 import { getTops, OTHERS, DESCRIPTIONS, getChapterTops } from "./utils";
 
@@ -21,7 +19,6 @@ type ChapterOccurence = {
 };
 
 const occurences = chaptersOccurences;
-const paths = chapterPaths;
 const bookData: ChapterOccurence[] = bookOccurence;
 const topCharacters = getTops(occurences);
 const entities = [...topCharacters, OTHERS, DESCRIPTIONS];
@@ -32,31 +29,6 @@ function move(input: any[], from: number, to: number) {
   numberOfDeletedElm = 0;
   input.splice(to, numberOfDeletedElm, elm);
 }
-
-
-// function changeOrderForStackedBarChart(i: number) {
-//   document.getElementById("future-toc-entity-legend-0")!.innerHTML = "";
-//   // document.getElementById("future-toc-entity-0")!.innerHTML = "";
-
-//   const entityOrder = [...entities];
-//   move(entityOrder, i, 0);
-//   buildStackedBarChart(
-//     occurences,
-//     topCharacters,
-//     entityOrder,
-//     i,
-//     changeOrderForStackedBarChart
-//   );
-//   return true;
-// }
-
-// buildStackedBarChart(
-//   occurences,
-//   topCharacters,
-//   entities,
-//   0,
-//   changeOrderForStackedBarChart
-// );
 
 for (let i = 0; i < entities.length; i++) {
   const entityOrder = [...entities];
