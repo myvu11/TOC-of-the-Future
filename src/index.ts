@@ -2,7 +2,7 @@ import { modifyOPF, insertTOCFiles, zipToEpub } from "./utils/zipping.js";
 import { getChapterCount } from "./utils/chapterHandling.js";
 import { getTops, OTHERS, DESCRIPTIONS } from "../templates/scripts/utils.js";
 import chaptersOccurences from "../templates/chapterInstances/stackedData.json" assert { type: "json" };
-import { epubPath, extractedFolder } from "./generate-toc.js";
+import { epubPath, extractedFolder } from "./prepare-epub.js";
 
 const FILENAMEENTITY = "future-toc-entity";
 const ENDID = "-1";

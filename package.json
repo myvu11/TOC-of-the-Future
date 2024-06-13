@@ -5,8 +5,8 @@
   "main": "src/index.js",
   "type": "module",
   "scripts": {
-    "generate-toc": "node --loader ts-node/esm src/generate-toc.ts",
-    "start": "npm run generate-toc && npm run build && node --loader ts-node/esm src/index.ts",
+    "prepare-epub": "node --loader ts-node/esm src/prepare-epub.ts",
+    "start": "npm run prepare-epub && npm run build && node --loader ts-node/esm src/index.ts",
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "webpack serve",
     "build": "webpack build"
